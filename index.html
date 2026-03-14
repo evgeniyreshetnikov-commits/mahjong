@@ -75,7 +75,6 @@
             font-weight: 700;
         }
         
-        /* Игровое поле с фиксированными размерами */
         .game-board {
             position: relative;
             background: #2d5a3f;
@@ -88,7 +87,6 @@
             flex-shrink: 0;
         }
         
-        /* Плитки */
         .tile {
             position: absolute;
             width: 38px;
@@ -135,7 +133,6 @@
             transition: opacity 0.3s;
         }
         
-        /* Кнопки */
         .controls {
             margin-top: 15px;
             display: flex;
@@ -144,6 +141,7 @@
             justify-content: center;
             width: 100%;
             z-index: 1000;
+            position: relative;
         }
         
         .btn {
@@ -173,7 +171,6 @@
             opacity: 0.8;
         }
         
-        /* Модальные окна */
         .modal {
             position: fixed;
             top: 0;
@@ -261,7 +258,7 @@
 
     <script>
         // Инициализация Telegram
-        const tg = window.Telegram.WebApp;
+        var tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
         
@@ -270,12 +267,14 @@
             document.body.style.background = '#e8f5e9';
         }
         
-        // Кнопка Telegram
+        // Кнопка Telegram - ИСПРАВЛЕНО (без setColor)
         tg.MainButton.setText('🎮 ИГРАТЬ СНОВА');
-        tg.MainButton.setColor('#2d5a3f');
-        tg.MainButton.setTextColor('#ffd700');
+        tg.MainButton.setParams({
+            color: '#2d5a3f',
+            text_color: '#ffd700'
+        });
         
-        const tileSymbols = [
+        var tileSymbols = [
             { symbol: '🀀', type: 'wind' }, { symbol: '🀁', type: 'wind' },
             { symbol: '🀂', type: 'wind' }, { symbol: '🀃', type: 'wind' },
             { symbol: '🀄', type: 'dragon' }, { symbol: '🀅', type: 'dragon' },
@@ -297,23 +296,21 @@
             { symbol: '🀡', type: 'circle' }
         ];
 
-        let tiles = [];
-        let selectedTile = null;
-        let score = 0;
-        let pairs = 0;
-        let gameStartTime = 0;
-        let timerInterval = null;
-        let totalPairs = 0;
+        var tiles = [];
+        var selectedTile = null;
+        var score = 0;
+        var pairs = 0;
+        var gameStartTime = 0;
+        var timerInterval = null;
+        var totalPairs = 0;
 
-        // Упрощённая раскладка для мобильных
         function getTilePositions() {
-            const positions = [];
-            const centerX = 170;
-            const centerY = 190;
+            var positions = [];
+            var centerX = 170;
+            var centerY = 190;
             
-            // Слой 0 - 8x5
-            for (let row = 0; row < 5; row++) {
-                for (let col = 0; col < 8; col++) {
+            for (var row = 0; row < 5; row++) {
+                for (var col = 0; col < 8; col++) {
                     positions.push({
                         x: 20 + col * 42,
                         y: 20 + row * 56,
@@ -322,9 +319,8 @@
                 }
             }
             
-            // Слой 1 - 4x2
-            for (let row = 0; row < 2; row++) {
-                for (let col = 0; col < 4; col++) {
+            for (var row = 0; row < 2; row++) {
+                for (var col = 0; col < 4; col++) {
                     positions.push({
                         x: 60 + col * 42,
                         y: 70 + row * 56,
@@ -333,7 +329,6 @@
                 }
             }
             
-            // Слой 2 - вершина
             positions.push({ x: 100, y: 140, z: 2 });
             positions.push({ x: 142, y: 140, z: 2 });
             
@@ -341,46 +336,49 @@
         }
 
         function createTiles() {
-            const positions = getTilePositions();
-            const numPairs = Math.floor(positions.length / 2);
-            const selectedSymbols = [];
+            var positions = getTilePositions();
+            var numPairs = Math.floor(positions.length / 2);
+            var selectedSymbols = [];
             
-            for (let i = 0; i < numPairs; i++) {
-                const tileData = tileSymbols[i % tileSymbols.length];
+            for (var i = 0; i < numPairs; i++) {
+                var tileData = tileSymbols[i % tileSymbols.length];
                 selectedSymbols.push({ symbol: tileData.symbol, type: tileData.type });
                 selectedSymbols.push({ symbol: tileData.symbol, type: tileData.type });
             }
             
-            // Перемешивание
-            for (let i = selectedSymbols.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [selectedSymbols[i], selectedSymbols[j]] = [selectedSymbols[j], selectedSymbols[i]];
+            for (var i = selectedSymbols.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = selectedSymbols[i];
+                selectedSymbols[i] = selectedSymbols[j];
+                selectedSymbols[j] = temp;
             }
             
-            tiles = positions.map((pos, index) => ({
-                id: index,
-                x: pos.x,
-                y: pos.y,
-                z: pos.z,
-                symbol: selectedSymbols[index] ? selectedSymbols[index].symbol : '🀀',
-                type: selectedSymbols[index] ? selectedSymbols[index].type : 'character',
-                element: null,
-                removed: false
-            }));
+            tiles = positions.map(function(pos, index) {
+                return {
+                    id: index,
+                    x: pos.x,
+                    y: pos.y,
+                    z: pos.z,
+                    symbol: selectedSymbols[index] ? selectedSymbols[index].symbol : '🀀',
+                    type: selectedSymbols[index] ? selectedSymbols[index].type : 'character',
+                    element: null,
+                    removed: false
+                };
+            });
             
             totalPairs = numPairs;
         }
 
         function renderTiles() {
-            const board = document.getElementById('board');
+            var board = document.getElementById('board');
             if (!board) return;
             
             board.innerHTML = '';
             
-            tiles.forEach(tile => {
+            tiles.forEach(function(tile) {
                 if (tile.removed) return;
                 
-                const element = document.createElement('div');
+                var element = document.createElement('div');
                 element.className = 'tile';
                 element.textContent = tile.symbol;
                 element.setAttribute('data-type', tile.type);
@@ -396,38 +394,37 @@
                 board.appendChild(element);
             });
             
-            // Небольшая задержка для обновления
             setTimeout(function() {
                 updateBlockedStatus();
             }, 50);
         }
 
         function isTileBlocked(tile) {
-            const hasTileAbove = tiles.some(t => 
-                !t.removed && t.z > tile.z &&
-                Math.abs(t.x - tile.x) < 30 &&
-                Math.abs(t.y - tile.y) < 45
-            );
+            var hasTileAbove = tiles.some(function(t) {
+                return !t.removed && t.z > tile.z &&
+                    Math.abs(t.x - tile.x) < 30 &&
+                    Math.abs(t.y - tile.y) < 45;
+            });
             
             if (hasTileAbove) return true;
             
-            const leftBlocked = tiles.some(t => 
-                !t.removed && t.z === tile.z &&
-                Math.abs(t.y - tile.y) < 20 &&
-                t.x === tile.x - 38
-            );
+            var leftBlocked = tiles.some(function(t) {
+                return !t.removed && t.z === tile.z &&
+                    Math.abs(t.y - tile.y) < 20 &&
+                    t.x === tile.x - 38;
+            });
             
-            const rightBlocked = tiles.some(t => 
-                !t.removed && t.z === tile.z &&
-                Math.abs(t.y - tile.y) < 20 &&
-                t.x === tile.x + 38
-            );
+            var rightBlocked = tiles.some(function(t) {
+                return !t.removed && t.z === tile.z &&
+                    Math.abs(t.y - tile.y) < 20 &&
+                    t.x === tile.x + 38;
+            });
             
             return leftBlocked && rightBlocked;
         }
 
         function updateBlockedStatus() {
-            tiles.forEach(tile => {
+            tiles.forEach(function(tile) {
                 if (tile.element && !tile.removed) {
                     if (isTileBlocked(tile)) {
                         tile.element.classList.add('blocked');
@@ -496,9 +493,11 @@
         }
 
         function hasAvailableMoves() {
-            const availableTiles = tiles.filter(t => !t.removed && !isTileBlocked(t));
-            for (let i = 0; i < availableTiles.length; i++) {
-                for (let j = i + 1; j < availableTiles.length; j++) {
+            var availableTiles = tiles.filter(function(t) {
+                return !t.removed && !isTileBlocked(t);
+            });
+            for (var i = 0; i < availableTiles.length; i++) {
+                for (var j = i + 1; j < availableTiles.length; j++) {
                     if (availableTiles[i].symbol === availableTiles[j].symbol) {
                         return true;
                     }
@@ -508,8 +507,8 @@
         }
 
         function updateStats() {
-            const scoreEl = document.getElementById('score');
-            const pairsEl = document.getElementById('pairs');
+            var scoreEl = document.getElementById('score');
+            var pairsEl = document.getElementById('pairs');
             if (scoreEl) scoreEl.textContent = score;
             if (pairsEl) pairsEl.textContent = pairs + '/' + totalPairs;
         }
@@ -518,17 +517,17 @@
             gameStartTime = Date.now();
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(function() {
-                const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
-                const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
-                const seconds = (elapsed % 60).toString().padStart(2, '0');
-                const timerEl = document.getElementById('timer');
+                var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+                var minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                var seconds = (elapsed % 60).toString().padStart(2, '0');
+                var timerEl = document.getElementById('timer');
                 if (timerEl) timerEl.textContent = minutes + ':' + seconds;
             }, 1000);
         }
 
         function gameWin() {
             clearInterval(timerInterval);
-            const finalTime = document.getElementById('timer').textContent;
+            var finalTime = document.getElementById('timer').textContent;
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalTime').textContent = finalTime;
             document.getElementById('winModal').classList.add('show');
@@ -545,12 +544,18 @@
         }
 
         function shuffleTiles() {
-            const availableTiles = tiles.filter(t => !t.removed);
-            const symbols = availableTiles.map(t => ({ symbol: t.symbol, type: t.type }));
+            var availableTiles = tiles.filter(function(t) {
+                return !t.removed;
+            });
+            var symbols = availableTiles.map(function(t) {
+                return { symbol: t.symbol, type: t.type };
+            });
             
-            for (let i = symbols.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [symbols[i], symbols[j]] = [symbols[j], symbols[i]];
+            for (var i = symbols.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = symbols[i];
+                symbols[i] = symbols[j];
+                symbols[j] = temp;
             }
             
             availableTiles.forEach(function(tile, index) {
@@ -584,11 +589,10 @@
             startTimer();
         }
 
-        tg.onEvent('mainButtonClicked', function() {
+        tg.MainButton.onClick(function() {
             resetGame();
         });
 
-        // Запуск после полной загрузки
         window.addEventListener('load', function() {
             setTimeout(function() {
                 resetGame();
