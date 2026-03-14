@@ -4,104 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🀄 Маджонг</title>
-    <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #1a472a 0%, #2d5a3f 50%, #1a472a 100%);
-            min-height: 100vh;
-            font-family: 'Noto Sans JP', sans-serif;
+            background: #1a472a;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 10px;
-            overflow-x: hidden;
-            overscroll-behavior: none;
-            user-select: none;
-            -webkit-user-select: none;
         }
         
         .game-header {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            width: 100%;
         }
         
         .title {
-            font-size: 32px;
+            font-size: 28px;
             color: #ffd700;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            margin-bottom: 10px;
         }
         
         .stats {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
+            width: 100%;
         }
         
         .stat-box {
             background: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            border-radius: 10px;
+            padding: 8px 15px;
+            border-radius: 8px;
             border: 2px solid #ffd700;
-            backdrop-filter: blur(10px);
+            text-align: center;
         }
         
         .stat-label {
             color: #fff;
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 2px;
         }
         
         .stat-value {
             color: #ffd700;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
         }
         
+        .timer {
+            color: #ffd700;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        /* Игровое поле с фиксированными размерами */
         .game-board {
             position: relative;
             background: #2d5a3f;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border-radius: 10px;
+            padding: 15px;
             border: 3px solid #8b4513;
-            width: 100%;
-            max-width: 500px;
-            height: 500px;
+            width: 340px;
+            height: 380px;
             overflow: hidden;
+            flex-shrink: 0;
         }
         
+        /* Плитки */
         .tile {
             position: absolute;
-            width: 42px;
-            height: 58px;
-            background: linear-gradient(145deg, #f8f4e6 0%, #e8dcc8 50%, #d4c4a8 100%);
-            border-radius: 6px;
+            width: 38px;
+            height: 52px;
+            background: linear-gradient(145deg, #f8f4e6 0%, #e8dcc8 100%);
+            border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 26px;
             cursor: pointer;
             box-shadow: 
-                1px 1px 3px rgba(0,0,0,0.4),
-                2px 2px 5px rgba(0,0,0,0.3),
-                inset 1px 1px 2px rgba(255,255,255,0.9);
+                1px 1px 2px rgba(0,0,0,0.3),
+                2px 2px 4px rgba(0,0,0,0.2);
             border: 1px solid #c9b896;
-            transition: all 0.3s ease;
             z-index: 1;
         }
         
@@ -117,119 +119,97 @@
             color: #000080;
         }
         
-        .tile:hover {
-            transform: translateY(-2px);
-        }
-        
         .tile.selected {
-            background: linear-gradient(145deg, #fff8dc 0%, #f0e68c 50%, #daa520 100%);
-            box-shadow: 0 0 15px #ffd700, 0 0 30px #ffd700;
-            transform: translateY(-3px);
+            background: #ffd700;
+            box-shadow: 0 0 10px #ffd700;
             z-index: 100;
         }
         
         .tile.blocked {
-            filter: brightness(0.65);
+            filter: brightness(0.6);
             cursor: not-allowed;
         }
         
         .tile.matched {
-            animation: matchAnim 0.5s ease forwards;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
         
-        @keyframes matchAnim {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.15); opacity: 0.8; }
-            100% { transform: scale(0); opacity: 0; }
-        }
-        
-        /* Кнопки ПОВЕРХ игры */
-        .controls-container {
-            margin-top: 20px;
+        /* Кнопки */
+        .controls {
+            margin-top: 15px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
+            width: 100%;
             z-index: 1000;
-            position: relative;
         }
         
         .btn {
-            padding: 12px 25px;
-            font-size: 14px;
-            font-family: 'Noto Sans JP', sans-serif;
+            padding: 10px 18px;
+            font-size: 13px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            z-index: 1000;
-            position: relative;
         }
         
         .btn-primary {
-            background: linear-gradient(145deg, #ffd700 0%, #ffaa00 100%);
+            background: #ffd700;
             color: #1a472a;
         }
         
         .btn-secondary {
-            background: linear-gradient(145deg, #8b4513 0%, #654321 100%);
+            background: #8b4513;
             color: #fff;
         }
         
+        .hints {
+            margin-top: 10px;
+            color: #fff;
+            font-size: 11px;
+            text-align: center;
+            opacity: 0.8;
+        }
+        
+        /* Модальные окна */
         .modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 2000;
         }
         
+        .modal.show {
+            display: flex;
+        }
+        
         .modal-content {
-            background: linear-gradient(145deg, #1a472a 0%, #2d5a3f 100%);
-            padding: 30px;
-            border-radius: 20px;
+            background: #1a472a;
+            padding: 25px;
+            border-radius: 15px;
             text-align: center;
             border: 3px solid #ffd700;
-            max-width: 90%;
+            max-width: 85%;
         }
         
         .modal-title {
-            font-size: 32px;
+            font-size: 26px;
             color: #ffd700;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         
         .modal-text {
-            font-size: 18px;
+            font-size: 16px;
             color: #fff;
-            margin-bottom: 20px;
-        }
-        
-        .hints {
-            margin-top: 15px;
-            color: #fff;
-            font-size: 12px;
-            opacity: 0.8;
-            text-align: center;
-            z-index: 1000;
-            position: relative;
-        }
-        
-        .timer {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 15px;
-            border-radius: 10px;
-            border: 2px solid #ffd700;
-            color: #ffd700;
-            font-size: 18px;
-            font-weight: 700;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -255,18 +235,17 @@
     
     <div class="game-board" id="board"></div>
     
-    <div class="controls-container">
+    <div class="controls">
         <button class="btn btn-primary" onclick="shuffleTiles()">Перемешать</button>
         <button class="btn btn-secondary" onclick="resetGame()">Новая игра</button>
         <button class="btn btn-secondary" onclick="showHint()">Подсказка</button>
     </div>
     
-    <div class="hints">Нажмите на две одинаковые открытые плитки</div>
+    <div class="hints">Нажмите на две одинаковые плитки</div>
     
     <div class="modal" id="winModal">
         <div class="modal-content">
             <div class="modal-title">🎉 Победа!</div>
-            <div class="modal-text">Вы очистили все плитки!</div>
             <div class="modal-text">Счёт: <span id="finalScore">0</span></div>
             <div class="modal-text">Время: <span id="finalTime">00:00</span></div>
             <button class="btn btn-primary" onclick="resetGame()">Играть снова</button>
@@ -276,23 +255,22 @@
     <div class="modal" id="noMovesModal">
         <div class="modal-content">
             <div class="modal-title">⚠️ Нет ходов!</div>
-            <div class="modal-text">Доступных пар не осталось</div>
             <button class="btn btn-primary" onclick="shuffleTiles()">Перемешать</button>
         </div>
     </div>
 
     <script>
-        // === TELEGRAM WEB APP ===
+        // Инициализация Telegram
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
         
         // Адаптация под тему
         if (tg.colorScheme === 'light') {
-            document.body.style.background = 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #e8f5e9 100%)';
+            document.body.style.background = '#e8f5e9';
         }
         
-        // Главная кнопка
+        // Кнопка Telegram
         tg.MainButton.setText('🎮 ИГРАТЬ СНОВА');
         tg.MainButton.setColor('#2d5a3f');
         tg.MainButton.setTextColor('#ffd700');
@@ -327,33 +305,37 @@
         let timerInterval = null;
         let totalPairs = 0;
 
+        // Упрощённая раскладка для мобильных
         function getTilePositions() {
             const positions = [];
-            const centerX = 250;
-            const centerY = 250;
+            const centerX = 170;
+            const centerY = 190;
             
-            for (let row = 0; row < 6; row++) {
+            // Слой 0 - 8x5
+            for (let row = 0; row < 5; row++) {
                 for (let col = 0; col < 8; col++) {
                     positions.push({
-                        x: centerX + (col - 4) * 45,
-                        y: centerY + (row - 3) * 62,
+                        x: 20 + col * 42,
+                        y: 20 + row * 56,
                         z: 0
                     });
                 }
             }
             
-            for (let row = 0; row < 3; row++) {
+            // Слой 1 - 4x2
+            for (let row = 0; row < 2; row++) {
                 for (let col = 0; col < 4; col++) {
                     positions.push({
-                        x: centerX + (col - 2) * 45 + 22,
-                        y: centerY + (row - 1.5) * 62 + 31,
+                        x: 60 + col * 42,
+                        y: 70 + row * 56,
                         z: 1
                     });
                 }
             }
             
-            positions.push({ x: centerX - 22, y: centerY - 31, z: 2 });
-            positions.push({ x: centerX + 22, y: centerY - 31, z: 2 });
+            // Слой 2 - вершина
+            positions.push({ x: 100, y: 140, z: 2 });
+            positions.push({ x: 142, y: 140, z: 2 });
             
             return positions;
         }
@@ -369,6 +351,7 @@
                 selectedSymbols.push({ symbol: tileData.symbol, type: tileData.type });
             }
             
+            // Перемешивание
             for (let i = selectedSymbols.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [selectedSymbols[i], selectedSymbols[j]] = [selectedSymbols[j], selectedSymbols[i]];
@@ -390,6 +373,8 @@
 
         function renderTiles() {
             const board = document.getElementById('board');
+            if (!board) return;
+            
             board.innerHTML = '';
             
             tiles.forEach(tile => {
@@ -403,34 +388,39 @@
                 element.style.top = tile.y + 'px';
                 element.style.zIndex = tile.z + 1;
                 
-                element.addEventListener('click', () => onTileClick(tile));
+                element.addEventListener('click', function() {
+                    onTileClick(tile);
+                });
                 
                 tile.element = element;
                 board.appendChild(element);
             });
             
-            updateBlockedStatus();
+            // Небольшая задержка для обновления
+            setTimeout(function() {
+                updateBlockedStatus();
+            }, 50);
         }
 
         function isTileBlocked(tile) {
             const hasTileAbove = tiles.some(t => 
                 !t.removed && t.z > tile.z &&
-                Math.abs(t.x - tile.x) < 35 &&
-                Math.abs(t.y - tile.y) < 50
+                Math.abs(t.x - tile.x) < 30 &&
+                Math.abs(t.y - tile.y) < 45
             );
             
             if (hasTileAbove) return true;
             
             const leftBlocked = tiles.some(t => 
                 !t.removed && t.z === tile.z &&
-                Math.abs(t.y - tile.y) < 25 &&
-                t.x === tile.x - 42
+                Math.abs(t.y - tile.y) < 20 &&
+                t.x === tile.x - 38
             );
             
             const rightBlocked = tiles.some(t => 
                 !t.removed && t.z === tile.z &&
-                Math.abs(t.y - tile.y) < 25 &&
-                t.x === tile.x + 42
+                Math.abs(t.y - tile.y) < 20 &&
+                t.x === tile.x + 38
             );
             
             return leftBlocked && rightBlocked;
@@ -482,11 +472,15 @@
             tile1.element.classList.add('matched');
             tile2.element.classList.add('matched');
             
-            setTimeout(() => {
+            setTimeout(function() {
                 tile1.removed = true;
                 tile2.removed = true;
-                if (tile1.element) tile1.element.remove();
-                if (tile2.element) tile2.element.remove();
+                if (tile1.element && tile1.element.parentNode) {
+                    tile1.element.parentNode.removeChild(tile1.element);
+                }
+                if (tile2.element && tile2.element.parentNode) {
+                    tile2.element.parentNode.removeChild(tile2.element);
+                }
                 
                 score += 100;
                 pairs++;
@@ -498,7 +492,7 @@
                 } else if (!hasAvailableMoves()) {
                     showNoMovesModal();
                 }
-            }, 500);
+            }, 300);
         }
 
         function hasAvailableMoves() {
@@ -514,18 +508,21 @@
         }
 
         function updateStats() {
-            document.getElementById('score').textContent = score;
-            document.getElementById('pairs').textContent = `${pairs}/${totalPairs}`;
+            const scoreEl = document.getElementById('score');
+            const pairsEl = document.getElementById('pairs');
+            if (scoreEl) scoreEl.textContent = score;
+            if (pairsEl) pairsEl.textContent = pairs + '/' + totalPairs;
         }
 
         function startTimer() {
             gameStartTime = Date.now();
             if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
+            timerInterval = setInterval(function() {
                 const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
                 const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
                 const seconds = (elapsed % 60).toString().padStart(2, '0');
-                document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+                const timerEl = document.getElementById('timer');
+                if (timerEl) timerEl.textContent = minutes + ':' + seconds;
             }, 1000);
         }
 
@@ -534,7 +531,7 @@
             const finalTime = document.getElementById('timer').textContent;
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalTime').textContent = finalTime;
-            document.getElementById('winModal').style.display = 'flex';
+            document.getElementById('winModal').classList.add('show');
             
             tg.MainButton.show();
             
@@ -544,7 +541,7 @@
         }
 
         function showNoMovesModal() {
-            document.getElementById('noMovesModal').style.display = 'flex';
+            document.getElementById('noMovesModal').classList.add('show');
         }
 
         function shuffleTiles() {
@@ -556,7 +553,7 @@
                 [symbols[i], symbols[j]] = [symbols[j], symbols[i]];
             }
             
-            availableTiles.forEach((tile, index) => {
+            availableTiles.forEach(function(tile, index) {
                 tile.symbol = symbols[index].symbol;
                 tile.type = symbols[index].type;
                 if (tile.element) {
@@ -567,30 +564,36 @@
             
             selectedTile = null;
             updateBlockedStatus();
-            document.getElementById('noMovesModal').style.display = 'none';
+            document.getElementById('noMovesModal').classList.remove('show');
         }
 
         function resetGame() {
             clearInterval(timerInterval);
-            document.getElementById('winModal').style.display = 'none';
-            document.getElementById('noMovesModal').style.display = 'none';
+            document.getElementById('winModal').classList.remove('show');
+            document.getElementById('noMovesModal').classList.remove('show');
             tg.MainButton.hide();
             
             score = 0;
             pairs = 0;
             selectedTile = null;
             
+            tiles = [];
             createTiles();
             renderTiles();
             updateStats();
             startTimer();
         }
 
-        tg.onEvent('mainButtonClicked', () => {
+        tg.onEvent('mainButtonClicked', function() {
             resetGame();
         });
 
-        resetGame();
+        // Запуск после полной загрузки
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                resetGame();
+            }, 100);
+        });
     </script>
 </body>
 </html>
