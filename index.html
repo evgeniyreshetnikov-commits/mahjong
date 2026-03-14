@@ -37,7 +37,7 @@
         }
         
         .title {
-            font-size: 20px;
+            font-size: 18px;
             color: #ffd700;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             font-weight: bold;
@@ -45,7 +45,7 @@
         
         .stats {
             display: flex;
-            gap: 5px;
+            gap: 4px;
             justify-content: center;
             margin-bottom: 5px;
             width: 100%;
@@ -53,60 +53,61 @@
         
         .stat-box {
             background: rgba(255, 255, 255, 0.15);
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 6px;
             border: 2px solid #ffd700;
             text-align: center;
             flex: 1;
-            max-width: 70px;
+            max-width: 65px;
         }
         
         .stat-label {
             color: #fff;
-            font-size: 9px;
+            font-size: 8px;
             text-transform: uppercase;
         }
         
         .stat-value {
             color: #ffd700;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
         }
         
         .timer {
             color: #ffd700;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
         }
         
-        /* Игровое поле - БОЛЬШЕ для всех плиток */
+        /* Игровое поле - адаптивное */
         .game-board {
             position: relative;
             background: #2d5a3f;
             border-radius: 8px;
-            padding: 10px;
+            padding: 8px;
             border: 3px solid #8b4513;
-            width: 380px;
-            height: 520px;
+            width: 100%;
+            max-width: 340px;
+            height: 440px;
             flex-shrink: 0;
-            overflow: visible;
+            overflow: hidden;
         }
         
-        /* Плитка 40x54px */
+        /* Плитка - базовый размер */
         .tile {
             position: absolute;
-            width: 40px;
-            height: 54px;
+            width: 32px;
+            height: 44px;
             background: linear-gradient(145deg, #f8f4e6 0%, #e8dcc8 100%);
-            border-radius: 5px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            font-size: 20px;
             cursor: pointer;
             box-shadow: 
-                2px 2px 4px rgba(0,0,0,0.5),
-                3px 3px 6px rgba(0,0,0,0.4);
+                1px 1px 2px rgba(0,0,0,0.4),
+                2px 2px 3px rgba(0,0,0,0.3);
             border: 1px solid #c9b896;
             z-index: 1;
         }
@@ -125,7 +126,7 @@
         
         .tile.selected {
             background: #ffd700;
-            box-shadow: 0 0 15px #ffd700, 2px 2px 4px rgba(0,0,0,0.5);
+            box-shadow: 0 0 10px #ffd700, 1px 1px 2px rgba(0,0,0,0.4);
             z-index: 100;
         }
         
@@ -140,27 +141,27 @@
         }
         
         .controls {
-            margin-top: 10px;
+            margin-top: 8px;
             display: flex;
-            gap: 5px;
+            gap: 4px;
             flex-wrap: wrap;
             justify-content: center;
             width: 100%;
-            max-width: 380px;
+            max-width: 340px;
             z-index: 1000;
             position: relative;
         }
         
         .btn {
-            padding: 10px 14px;
-            font-size: 11px;
+            padding: 8px 10px;
+            font-size: 10px;
             font-weight: bold;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             text-transform: uppercase;
             flex: 1;
-            min-width: 85px;
+            min-width: 75px;
         }
         
         .btn-primary {
@@ -174,9 +175,9 @@
         }
         
         .hints {
-            margin-top: 6px;
+            margin-top: 5px;
             color: #fff;
-            font-size: 10px;
+            font-size: 9px;
             text-align: center;
             opacity: 0.7;
         }
@@ -208,40 +209,68 @@
         }
         
         .modal-title {
-            font-size: 22px;
+            font-size: 20px;
             color: #ffd700;
             margin-bottom: 10px;
             font-weight: bold;
         }
         
         .modal-text {
-            font-size: 14px;
+            font-size: 13px;
             color: #fff;
             margin-bottom: 12px;
         }
         
-        /* Адаптация под маленькие экраны */
-        @media (max-width: 400px) {
+        /* Адаптация под РАЗНЫЕ экраны телефонов */
+        @media (max-width: 360px) {
             .game-board {
-                width: 350px;
-                height: 500px;
+                max-width: 300px;
+                height: 400px;
+                padding: 6px;
             }
             .tile {
-                width: 36px;
-                height: 50px;
-                font-size: 24px;
+                width: 28px;
+                height: 40px;
+                font-size: 18px;
+            }
+            .title {
+                font-size: 16px;
+            }
+            .btn {
+                padding: 7px 8px;
+                font-size: 9px;
+                min-width: 70px;
             }
         }
         
-        @media (max-width: 360px) {
+        @media (max-width: 330px) {
             .game-board {
-                width: 320px;
-                height: 480px;
+                max-width: 280px;
+                height: 380px;
+                padding: 5px;
+            }
+            .tile {
+                width: 26px;
+                height: 38px;
+                font-size: 16px;
+            }
+        }
+        
+        @media (min-width: 400px) {
+            .game-board {
+                max-width: 360px;
+                height: 460px;
             }
             .tile {
                 width: 34px;
-                height: 48px;
+                height: 46px;
                 font-size: 22px;
+            }
+        }
+        
+        @media (min-height: 800px) {
+            .game-board {
+                height: 500px;
             }
         }
     </style>
@@ -336,52 +365,110 @@
         var gameStartTime = 0;
         var timerInterval = null;
         var totalPairs = 0;
+        
+        // Динамические размеры - вычисляются при загрузке
+        var tileWidth = 32;
+        var tileHeight = 44;
+        var tileStepX = 34;
+        var tileStepY = 46;
+        var boardWidth = 340;
+        var boardHeight = 440;
+        var padding = 8;
+        var cols = 8;
+        var rows = 6;
 
-        // ИСПРАВЛЕННАЯ раскладка - все плитки в пределах поля
-        // Поле: 380px × 520px, padding: 10px
-        // Рабочая область: 360px × 500px
-        // Плитка: 40px × 54px, шаг: 42px × 56px
+        // Вычисление размеров под экран
+        function calculateSizes() {
+            var screenWidth = window.innerWidth - 20;
+            var screenHeight = window.innerHeight - 150;
+            
+            // Определяем максимальную ширину поля
+            if (screenWidth < 320) {
+                boardWidth = 280;
+                tileWidth = 26;
+                tileStepX = 28;
+            } else if (screenWidth < 360) {
+                boardWidth = 300;
+                tileWidth = 28;
+                tileStepX = 30;
+            } else if (screenWidth < 400) {
+                boardWidth = 340;
+                tileWidth = 32;
+                tileStepX = 34;
+            } else {
+                boardWidth = 360;
+                tileWidth = 34;
+                tileStepX = 36;
+            }
+            
+            // Высота под экран
+            if (screenHeight < 450) {
+                boardHeight = 380;
+                tileHeight = 38;
+                tileStepY = 40;
+            } else if (screenHeight < 550) {
+                boardHeight = 440;
+                tileHeight = 44;
+                tileStepY = 46;
+            } else {
+                boardHeight = 500;
+                tileHeight = 48;
+                tileStepY = 50;
+            }
+            
+            // Обновляем CSS переменные
+            document.documentElement.style.setProperty('--tile-width', tileWidth + 'px');
+            document.documentElement.style.setProperty('--tile-height', tileHeight + 'px');
+            document.documentElement.style.setProperty('--board-width', boardWidth + 'px');
+            document.documentElement.style.setProperty('--board-height', boardHeight + 'px');
+        }
+
+        // Упрощённая раскладка - меньше плиток для мобильных
         function getTilePositions() {
             var positions = [];
             
-            // Слой 0 - 8×6 = 48 плиток
-            // 8 × 42 = 336px + 24px margin = 360px ✓
-            for (var row = 0; row < 6; row++) {
+            // Слой 0 - 8×5 = 40 плиток
+            for (var row = 0; row < 5; row++) {
                 for (var col = 0; col < 8; col++) {
                     positions.push({
-                        x: 12 + col * 42,
-                        y: 12 + row * 56,
+                        x: padding + col * tileStepX,
+                        y: padding + row * tileStepY,
                         z: 0
                     });
                 }
             }
             
-            // Слой 1 - 6×3 = 18 плиток (центрирован)
-            // 6 × 42 = 252px + 54px margin = 306px (центр)
-            for (var row = 0; row < 3; row++) {
+            // Слой 1 - 6×2 = 12 плиток
+            for (var row = 0; row < 2; row++) {
                 for (var col = 0; col < 6; col++) {
                     positions.push({
-                        x: 54 + col * 42,
-                        y: 40 + row * 56,
+                        x: padding + tileStepX + col * tileStepX,
+                        y: padding + tileStepY + row * tileStepY,
                         z: 1
                     });
                 }
             }
             
-            // Слой 2 - 4×2 = 8 плиток (центрирован)
-            for (var row = 0; row < 2; row++) {
-                for (var col = 0; col < 4; col++) {
-                    positions.push({
-                        x: 96 + col * 42,
-                        y: 68 + row * 56,
-                        z: 2
-                    });
-                }
+            // Слой 2 - 4×1 = 4 плитки
+            for (var col = 0; col < 4; col++) {
+                positions.push({
+                    x: padding + 2 * tileStepX + col * tileStepX,
+                    y: padding + 2 * tileStepY,
+                    z: 2
+                });
             }
             
-            // Слой 3 - 2 плитки вершина (центр)
-            positions.push({ x: 138, y: 96, z: 3 });
-            positions.push({ x: 180, y: 96, z: 3 });
+            // Слой 3 - 2 плитки вершина
+            positions.push({ 
+                x: padding + 3 * tileStepX, 
+                y: padding + 3 * tileStepY, 
+                z: 3 
+            });
+            positions.push({ 
+                x: padding + 4 * tileStepX, 
+                y: padding + 3 * tileStepY, 
+                z: 3 
+            });
             
             return positions;
         }
@@ -425,6 +512,8 @@
             if (!board) return;
             
             board.innerHTML = '';
+            board.style.width = boardWidth + 'px';
+            board.style.height = boardHeight + 'px';
             
             tiles.forEach(function(tile) {
                 if (tile.removed) return;
@@ -433,6 +522,9 @@
                 element.className = 'tile';
                 element.textContent = tile.symbol;
                 element.setAttribute('data-type', tile.type);
+                element.style.width = tileWidth + 'px';
+                element.style.height = tileHeight + 'px';
+                element.style.fontSize = (tileWidth * 0.6) + 'px';
                 element.style.left = tile.x + 'px';
                 element.style.top = tile.y + 'px';
                 element.style.zIndex = tile.z + 1;
@@ -453,22 +545,22 @@
         function isTileBlocked(tile) {
             var hasTileAbove = tiles.some(function(t) {
                 return !t.removed && t.z > tile.z &&
-                    Math.abs(t.x - tile.x) < 35 &&
-                    Math.abs(t.y - tile.y) < 45;
+                    Math.abs(t.x - tile.x) < tileWidth - 5 &&
+                    Math.abs(t.y - tile.y) < tileHeight - 5;
             });
             
             if (hasTileAbove) return true;
             
             var leftBlocked = tiles.some(function(t) {
                 return !t.removed && t.z === tile.z &&
-                    Math.abs(t.y - tile.y) < 25 &&
-                    t.x === tile.x - 40;
+                    Math.abs(t.y - tile.y) < 20 &&
+                    t.x === tile.x - tileWidth;
             });
             
             var rightBlocked = tiles.some(function(t) {
                 return !t.removed && t.z === tile.z &&
-                    Math.abs(t.y - tile.y) < 25 &&
-                    t.x === tile.x + 40;
+                    Math.abs(t.y - tile.y) < 20 &&
+                    t.x === tile.x + tileWidth;
             });
             
             return leftBlocked && rightBlocked;
@@ -633,6 +725,9 @@
             pairs = 0;
             selectedTile = null;
             
+            // Пересчитываем размеры перед новой игрой
+            calculateSizes();
+            
             tiles = [];
             createTiles();
             renderTiles();
@@ -644,7 +739,13 @@
             resetGame();
         });
 
+        // Обработка изменения размера окна
+        window.addEventListener('resize', function() {
+            calculateSizes();
+        });
+
         window.addEventListener('load', function() {
+            calculateSizes();
             setTimeout(function() {
                 resetGame();
             }, 100);
