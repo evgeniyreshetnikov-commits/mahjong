@@ -79,34 +79,34 @@
             font-weight: 700;
         }
         
-        /* Игровое поле - размеры под плитку 36x48px */
+        /* Игровое поле - БОЛЬШЕ для всех плиток */
         .game-board {
             position: relative;
             background: #2d5a3f;
             border-radius: 8px;
-            padding: 8px;
+            padding: 10px;
             border: 3px solid #8b4513;
-            width: 320px;
-            height: 420px;
+            width: 380px;
+            height: 520px;
             flex-shrink: 0;
-            overflow: hidden;
+            overflow: visible;
         }
         
-        /* Плитка 36x48px - влезает 8 плиток в ряд */
+        /* Плитка 40x54px */
         .tile {
             position: absolute;
-            width: 36px;
-            height: 48px;
+            width: 40px;
+            height: 54px;
             background: linear-gradient(145deg, #f8f4e6 0%, #e8dcc8 100%);
             border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 26px;
             cursor: pointer;
             box-shadow: 
-                1px 1px 3px rgba(0,0,0,0.4),
-                2px 2px 4px rgba(0,0,0,0.3);
+                2px 2px 4px rgba(0,0,0,0.5),
+                3px 3px 6px rgba(0,0,0,0.4);
             border: 1px solid #c9b896;
             z-index: 1;
         }
@@ -125,7 +125,7 @@
         
         .tile.selected {
             background: #ffd700;
-            box-shadow: 0 0 12px #ffd700, 2px 2px 4px rgba(0,0,0,0.4);
+            box-shadow: 0 0 15px #ffd700, 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 100;
         }
         
@@ -146,7 +146,7 @@
             flex-wrap: wrap;
             justify-content: center;
             width: 100%;
-            max-width: 320px;
+            max-width: 380px;
             z-index: 1000;
             position: relative;
         }
@@ -221,28 +221,27 @@
         }
         
         /* Адаптация под маленькие экраны */
-        @media (max-width: 350px) {
+        @media (max-width: 400px) {
             .game-board {
-                width: 300px;
-                height: 400px;
+                width: 350px;
+                height: 500px;
             }
             .tile {
-                width: 34px;
-                height: 46px;
-                font-size: 22px;
+                width: 36px;
+                height: 50px;
+                font-size: 24px;
             }
         }
         
-        /* Адаптация под большие экраны */
-        @media (min-height: 750px) {
+        @media (max-width: 360px) {
             .game-board {
-                width: 340px;
-                height: 460px;
+                width: 320px;
+                height: 480px;
             }
             .tile {
-                width: 38px;
-                height: 50px;
-                font-size: 26px;
+                width: 34px;
+                height: 48px;
+                font-size: 22px;
             }
         }
     </style>
@@ -338,48 +337,51 @@
         var timerInterval = null;
         var totalPairs = 0;
 
-        // Расчёт позиций - 8 колонок × 6 рядов
-        // Плитка 36px + отступ 2px = 38px на плитку
-        // 8 × 38 = 304px + padding 8px × 2 = 320px ✓
+        // ИСПРАВЛЕННАЯ раскладка - все плитки в пределах поля
+        // Поле: 380px × 520px, padding: 10px
+        // Рабочая область: 360px × 500px
+        // Плитка: 40px × 54px, шаг: 42px × 56px
         function getTilePositions() {
             var positions = [];
             
             // Слой 0 - 8×6 = 48 плиток
+            // 8 × 42 = 336px + 24px margin = 360px ✓
             for (var row = 0; row < 6; row++) {
                 for (var col = 0; col < 8; col++) {
                     positions.push({
-                        x: 10 + col * 38,
-                        y: 10 + row * 50,
+                        x: 12 + col * 42,
+                        y: 12 + row * 56,
                         z: 0
                     });
                 }
             }
             
-            // Слой 1 - 6×3 = 18 плиток
+            // Слой 1 - 6×3 = 18 плиток (центрирован)
+            // 6 × 42 = 252px + 54px margin = 306px (центр)
             for (var row = 0; row < 3; row++) {
                 for (var col = 0; col < 6; col++) {
                     positions.push({
-                        x: 29 + col * 38,
-                        y: 35 + row * 50,
+                        x: 54 + col * 42,
+                        y: 40 + row * 56,
                         z: 1
                     });
                 }
             }
             
-            // Слой 2 - 4×2 = 8 плиток
+            // Слой 2 - 4×2 = 8 плиток (центрирован)
             for (var row = 0; row < 2; row++) {
                 for (var col = 0; col < 4; col++) {
                     positions.push({
-                        x: 48 + col * 38,
-                        y: 60 + row * 50,
+                        x: 96 + col * 42,
+                        y: 68 + row * 56,
                         z: 2
                     });
                 }
             }
             
-            // Слой 3 - 2 плитки вершина
-            positions.push({ x: 85, y: 85, z: 3 });
-            positions.push({ x: 123, y: 85, z: 3 });
+            // Слой 3 - 2 плитки вершина (центр)
+            positions.push({ x: 138, y: 96, z: 3 });
+            positions.push({ x: 180, y: 96, z: 3 });
             
             return positions;
         }
@@ -451,22 +453,22 @@
         function isTileBlocked(tile) {
             var hasTileAbove = tiles.some(function(t) {
                 return !t.removed && t.z > tile.z &&
-                    Math.abs(t.x - tile.x) < 30 &&
-                    Math.abs(t.y - tile.y) < 40;
+                    Math.abs(t.x - tile.x) < 35 &&
+                    Math.abs(t.y - tile.y) < 45;
             });
             
             if (hasTileAbove) return true;
             
             var leftBlocked = tiles.some(function(t) {
                 return !t.removed && t.z === tile.z &&
-                    Math.abs(t.y - tile.y) < 20 &&
-                    t.x === tile.x - 36;
+                    Math.abs(t.y - tile.y) < 25 &&
+                    t.x === tile.x - 40;
             });
             
             var rightBlocked = tiles.some(function(t) {
                 return !t.removed && t.z === tile.z &&
-                    Math.abs(t.y - tile.y) < 20 &&
-                    t.x === tile.x + 36;
+                    Math.abs(t.y - tile.y) < 25 &&
+                    t.x === tile.x + 40;
             });
             
             return leftBlocked && rightBlocked;
