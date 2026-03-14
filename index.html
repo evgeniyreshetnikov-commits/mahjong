@@ -26,18 +26,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 8px;
+            padding: 5px;
             min-height: 100vh;
         }
         
         .game-header {
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             width: 100%;
         }
         
         .title {
-            font-size: 24px;
+            font-size: 20px;
             color: #ffd700;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             font-weight: bold;
@@ -45,70 +45,68 @@
         
         .stats {
             display: flex;
-            gap: 8px;
+            gap: 5px;
             justify-content: center;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             width: 100%;
         }
         
         .stat-box {
             background: rgba(255, 255, 255, 0.15);
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 6px;
             border: 2px solid #ffd700;
             text-align: center;
             flex: 1;
-            max-width: 80px;
+            max-width: 70px;
         }
         
         .stat-label {
             color: #fff;
-            font-size: 10px;
+            font-size: 9px;
             text-transform: uppercase;
         }
         
         .stat-value {
             color: #ffd700;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
         }
         
         .timer {
             color: #ffd700;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
         }
         
-        /* Игровое поле - вертикальное под экран телефона */
+        /* Игровое поле - размеры под плитку 36x48px */
         .game-board {
             position: relative;
             background: #2d5a3f;
             border-radius: 8px;
-            padding: 10px;
+            padding: 8px;
             border: 3px solid #8b4513;
-            width: 100%;
-            max-width: 360px;
-            height: auto;
-            min-height: 480px;
+            width: 320px;
+            height: 420px;
             flex-shrink: 0;
             overflow: hidden;
         }
         
-        /* Плитки - больше для мобильных */
+        /* Плитка 36x48px - влезает 8 плиток в ряд */
         .tile {
             position: absolute;
-            width: 42px;
-            height: 56px;
+            width: 36px;
+            height: 48px;
             background: linear-gradient(145deg, #f8f4e6 0%, #e8dcc8 100%);
-            border-radius: 6px;
+            border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 24px;
             cursor: pointer;
             box-shadow: 
-                2px 2px 4px rgba(0,0,0,0.4),
-                3px 3px 6px rgba(0,0,0,0.3);
+                1px 1px 3px rgba(0,0,0,0.4),
+                2px 2px 4px rgba(0,0,0,0.3);
             border: 1px solid #c9b896;
             z-index: 1;
         }
@@ -127,9 +125,8 @@
         
         .tile.selected {
             background: #ffd700;
-            box-shadow: 0 0 15px #ffd700, 2px 2px 4px rgba(0,0,0,0.4);
+            box-shadow: 0 0 12px #ffd700, 2px 2px 4px rgba(0,0,0,0.4);
             z-index: 100;
-            transform: scale(1.05);
         }
         
         .tile.blocked {
@@ -142,29 +139,28 @@
             transition: opacity 0.3s;
         }
         
-        /* Кнопки */
         .controls {
-            margin-top: 12px;
+            margin-top: 10px;
             display: flex;
-            gap: 6px;
+            gap: 5px;
             flex-wrap: wrap;
             justify-content: center;
             width: 100%;
-            max-width: 360px;
+            max-width: 320px;
             z-index: 1000;
             position: relative;
         }
         
         .btn {
-            padding: 12px 16px;
-            font-size: 12px;
+            padding: 10px 14px;
+            font-size: 11px;
             font-weight: bold;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             text-transform: uppercase;
             flex: 1;
-            min-width: 90px;
+            min-width: 85px;
         }
         
         .btn-primary {
@@ -178,14 +174,13 @@
         }
         
         .hints {
-            margin-top: 8px;
+            margin-top: 6px;
             color: #fff;
-            font-size: 11px;
+            font-size: 10px;
             text-align: center;
             opacity: 0.7;
         }
         
-        /* Модальные окна */
         .modal {
             position: fixed;
             top: 0;
@@ -205,56 +200,49 @@
         
         .modal-content {
             background: linear-gradient(145deg, #1a472a 0%, #2d5a3f 100%);
-            padding: 25px 20px;
-            border-radius: 15px;
+            padding: 20px 15px;
+            border-radius: 12px;
             text-align: center;
             border: 3px solid #ffd700;
             max-width: 85%;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
         }
         
         .modal-title {
-            font-size: 24px;
+            font-size: 22px;
             color: #ffd700;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             font-weight: bold;
         }
         
         .modal-text {
-            font-size: 15px;
+            font-size: 14px;
             color: #fff;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         
-        /* Адаптация под разные экраны */
-        @media (max-width: 360px) {
+        /* Адаптация под маленькие экраны */
+        @media (max-width: 350px) {
+            .game-board {
+                width: 300px;
+                height: 400px;
+            }
+            .tile {
+                width: 34px;
+                height: 46px;
+                font-size: 22px;
+            }
+        }
+        
+        /* Адаптация под большие экраны */
+        @media (min-height: 750px) {
+            .game-board {
+                width: 340px;
+                height: 460px;
+            }
             .tile {
                 width: 38px;
-                height: 52px;
-                font-size: 24px;
-            }
-            .game-board {
-                min-height: 440px;
-                padding: 8px;
-            }
-            .title {
-                font-size: 20px;
-            }
-            .btn {
-                padding: 10px 12px;
-                font-size: 11px;
-                min-width: 80px;
-            }
-        }
-        
-        @media (min-height: 700px) {
-            .game-board {
-                min-height: 540px;
-            }
-            .tile {
-                width: 46px;
-                height: 60px;
-                font-size: 30px;
+                height: 50px;
+                font-size: 26px;
             }
         }
     </style>
@@ -350,46 +338,48 @@
         var timerInterval = null;
         var totalPairs = 0;
 
-        // Вертикальная раскладка под экран телефона
+        // Расчёт позиций - 8 колонок × 6 рядов
+        // Плитка 36px + отступ 2px = 38px на плитку
+        // 8 × 38 = 304px + padding 8px × 2 = 320px ✓
         function getTilePositions() {
             var positions = [];
             
-            // Слой 0 - 8x6 (вертикально)
+            // Слой 0 - 8×6 = 48 плиток
             for (var row = 0; row < 6; row++) {
                 for (var col = 0; col < 8; col++) {
                     positions.push({
-                        x: 14 + col * 44,
-                        y: 14 + row * 58,
+                        x: 10 + col * 38,
+                        y: 10 + row * 50,
                         z: 0
                     });
                 }
             }
             
-            // Слой 1 - 6x3
+            // Слой 1 - 6×3 = 18 плиток
             for (var row = 0; row < 3; row++) {
                 for (var col = 0; col < 6; col++) {
                     positions.push({
-                        x: 36 + col * 44,
-                        y: 50 + row * 58,
+                        x: 29 + col * 38,
+                        y: 35 + row * 50,
                         z: 1
                     });
                 }
             }
             
-            // Слой 2 - 4x2
+            // Слой 2 - 4×2 = 8 плиток
             for (var row = 0; row < 2; row++) {
                 for (var col = 0; col < 4; col++) {
                     positions.push({
-                        x: 58 + col * 44,
-                        y: 86 + row * 58,
+                        x: 48 + col * 38,
+                        y: 60 + row * 50,
                         z: 2
                     });
                 }
             }
             
-            // Слой 3 - вершина 2 плитки
-            positions.push({ x: 102, y: 144, z: 3 });
-            positions.push({ x: 146, y: 144, z: 3 });
+            // Слой 3 - 2 плитки вершина
+            positions.push({ x: 85, y: 85, z: 3 });
+            positions.push({ x: 123, y: 85, z: 3 });
             
             return positions;
         }
@@ -461,22 +451,22 @@
         function isTileBlocked(tile) {
             var hasTileAbove = tiles.some(function(t) {
                 return !t.removed && t.z > tile.z &&
-                    Math.abs(t.x - tile.x) < 35 &&
-                    Math.abs(t.y - tile.y) < 50;
+                    Math.abs(t.x - tile.x) < 30 &&
+                    Math.abs(t.y - tile.y) < 40;
             });
             
             if (hasTileAbove) return true;
             
             var leftBlocked = tiles.some(function(t) {
                 return !t.removed && t.z === tile.z &&
-                    Math.abs(t.y - tile.y) < 25 &&
-                    t.x === tile.x - 42;
+                    Math.abs(t.y - tile.y) < 20 &&
+                    t.x === tile.x - 36;
             });
             
             var rightBlocked = tiles.some(function(t) {
                 return !t.removed && t.z === tile.z &&
-                    Math.abs(t.y - tile.y) < 25 &&
-                    t.x === tile.x + 42;
+                    Math.abs(t.y - tile.y) < 20 &&
+                    t.x === tile.x + 36;
             });
             
             return leftBlocked && rightBlocked;
