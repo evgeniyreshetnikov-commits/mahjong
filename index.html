@@ -79,21 +79,21 @@
             font-weight: 700;
         }
         
-        /* Игровое поле - больше для 100+ плиток */
+        /* Поле БОЛЬШЕ для 6 ярусов */
         .game-board {
             position: relative;
             background: #2d5a3f;
             border-radius: 10px;
-            padding: 10px;
+            padding: 12px;
             border: 3px solid #8b4513;
             width: 100%;
-            max-width: 380px;
-            height: 520px;
+            max-width: 400px;
+            height: 560px;
             flex-shrink: 0;
             overflow: hidden;
         }
         
-        /* Плитка - КРУПНАЯ */
+        /* Плитка 42×56px - НЕ уменьшаем */
         .tile {
             position: absolute;
             width: 42px;
@@ -110,7 +110,6 @@
                 3px 3px 6px rgba(0,0,0,0.4);
             border: 1px solid #c9b896;
             z-index: 1;
-            transition: transform 0.2s;
         }
         
         .tile[data-type="bamboo"], .tile[data-type="character"] {
@@ -154,7 +153,7 @@
             flex-wrap: wrap;
             justify-content: center;
             width: 100%;
-            max-width: 380px;
+            max-width: 400px;
             z-index: 1000;
             position: relative;
         }
@@ -228,11 +227,17 @@
             margin-bottom: 15px;
         }
         
-        /* Адаптация под экраны */
-        @media (max-width: 360px) {
+        @media (max-width: 380px) {
             .game-board {
-                max-width: 340px;
-                height: 480px;
+                max-width: 360px;
+                height: 520px;
+            }
+        }
+        
+        @media (max-width: 350px) {
+            .game-board {
+                max-width: 330px;
+                height: 500px;
             }
             .tile {
                 width: 38px;
@@ -241,21 +246,9 @@
             }
         }
         
-        @media (max-width: 330px) {
+        @media (min-height: 800px) {
             .game-board {
-                max-width: 310px;
-                height: 450px;
-            }
-            .tile {
-                width: 36px;
-                height: 50px;
-                font-size: 24px;
-            }
-        }
-        
-        @media (min-height: 750px) {
-            .game-board {
-                height: 560px;
+                height: 600px;
             }
         }
     </style>
@@ -323,7 +316,6 @@
             text_color: '#ffd700'
         });
         
-        // 36 уникальных символов × 3 = 108 плиток (54 пары)
         var tileSymbols = [
             { symbol: '🀀', type: 'wind' }, { symbol: '🀁', type: 'wind' },
             { symbol: '🀂', type: 'wind' }, { symbol: '🀃', type: 'wind' },
@@ -354,20 +346,23 @@
         var timerInterval = null;
         var totalPairs = 0;
         
-        // Размеры плиток
+        // Размеры - плитки НЕ уменьшаем
         var tileWidth = 42;
         var tileHeight = 56;
-        var tileStepX = 44;
-        var tileStepY = 58;
-        var padding = 10;
+        var tileStepX = 44;  // 42px + 2px зазор
+        var tileStepY = 58;  // 56px + 2px зазор
+        var padding = 12;
+        
+        // Поле 400px - padding 24px = 376px рабочей области
+        // 7 плиток × 44px = 308px + отступы = влезает ✓
 
-        // Раскладка "Черепаха" - 4 яруса, 108 плиток
+        // 6 ЯРУСОВ для 100+ плиток при 7 колонках
         function getTilePositions() {
             var positions = [];
             
-            // ЯРУС 0 (база) - 8×6 = 48 плиток
+            // ЯРУС 0 (база) - 7×6 = 42 плитки
             for (var row = 0; row < 6; row++) {
-                for (var col = 0; col < 8; col++) {
+                for (var col = 0; col < 7; col++) {
                     positions.push({
                         x: padding + col * tileStepX,
                         y: padding + row * tileStepY,
@@ -376,50 +371,53 @@
                 }
             }
             
-            // ЯРУС 1 - 6×4 = 24 плитки
-            for (var row = 0; row < 4; row++) {
+            // ЯРУС 1 - 6×5 = 30 плиток
+            for (var row = 0; row < 5; row++) {
                 for (var col = 0; col < 6; col++) {
                     positions.push({
                         x: padding + tileStepX + col * tileStepX,
-                        y: padding + tileStepY + row * tileStepY,
+                        y: padding + tileStepY/2 + row * tileStepY,
                         z: 1
                     });
                 }
             }
             
-            // ЯРУС 2 - 4×3 = 12 плиток
-            for (var row = 0; row < 3; row++) {
-                for (var col = 0; col < 4; col++) {
+            // ЯРУС 2 - 5×4 = 20 плиток
+            for (var row = 0; row < 4; row++) {
+                for (var col = 0; col < 5; col++) {
                     positions.push({
                         x: padding + 2 * tileStepX + col * tileStepX,
-                        y: padding + 2 * tileStepY + row * tileStepY,
+                        y: padding + tileStepY + row * tileStepY,
                         z: 2
                     });
                 }
             }
             
-            // ЯРУС 3 (вершина) - 4×2 = 8 плиток
-            for (var row = 0; row < 2; row++) {
+            // ЯРУС 3 - 4×3 = 12 плиток
+            for (var row = 0; row < 3; row++) {
                 for (var col = 0; col < 4; col++) {
                     positions.push({
                         x: padding + 2.5 * tileStepX + col * tileStepX,
-                        y: padding + 3 * tileStepY + row * tileStepY,
+                        y: padding + 1.5 * tileStepY + row * tileStepY,
                         z: 3
                     });
                 }
             }
             
-            // ЯРУС 4 (пик) - 2×2 = 4 плитки
-            positions.push({ x: padding + 3 * tileStepX, y: padding + 4 * tileStepY, z: 4 });
-            positions.push({ x: padding + 4 * tileStepX, y: padding + 4 * tileStepY, z: 4 });
-            positions.push({ x: padding + 3 * tileStepX, y: padding + 4.5 * tileStepY, z: 4 });
-            positions.push({ x: padding + 4 * tileStepX, y: padding + 4.5 * tileStepY, z: 4 });
+            // ЯРУС 4 - 3×2 = 6 плиток
+            for (var row = 0; row < 2; row++) {
+                for (var col = 0; col < 3; col++) {
+                    positions.push({
+                        x: padding + 3 * tileStepX + col * tileStepX,
+                        y: padding + 2 * tileStepY + row * tileStepY,
+                        z: 4
+                    });
+                }
+            }
             
-            // Крылья по бокам (добавочные)
-            positions.push({ x: padding - tileStepX, y: padding + 2.5 * tileStepY, z: 0 });
-            positions.push({ x: padding + 8 * tileStepX, y: padding + 2.5 * tileStepY, z: 0 });
-            positions.push({ x: padding - tileStepX, y: padding + 3.5 * tileStepY, z: 0 });
-            positions.push({ x: padding + 8 * tileStepX, y: padding + 3.5 * tileStepY, z: 0 });
+            // ЯРУС 5 (пик) - 2×1 = 2 плитки
+            positions.push({ x: padding + 3.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
+            positions.push({ x: padding + 4.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
             
             return positions;
         }
@@ -429,14 +427,12 @@
             var numPairs = Math.floor(positions.length / 2);
             var selectedSymbols = [];
             
-            // Берём символы циклично для 100+ плиток
             for (var i = 0; i < numPairs; i++) {
                 var tileData = tileSymbols[i % tileSymbols.length];
                 selectedSymbols.push({ symbol: tileData.symbol, type: tileData.type });
                 selectedSymbols.push({ symbol: tileData.symbol, type: tileData.type });
             }
             
-            // Перемешивание Фишера-Йетса
             for (var i = selectedSymbols.length - 1; i > 0; i--) {
                 var j = Math.floor(Math.random() * (i + 1));
                 var temp = selectedSymbols[i];
@@ -493,44 +489,30 @@
             }, 50);
         }
 
-        // ПРОВЕРКА: плитка свободна только если:
-        // 1. Нет плитки НАД ней (сверху по Z)
-        // 2. Свободна ЛЕВАЯ или ПРАВАЯ сторона
         function isTileFree(tile) {
-            // Проверяем есть ли плитка сверху (на более высоком ярусе)
             var hasTileAbove = tiles.some(function(t) {
                 if (t.removed || t.z <= tile.z) return false;
-                
-                // Плитка сверху перекрывает эту
                 var overlapX = Math.abs(t.x - tile.x) < tileWidth - 10;
                 var overlapY = Math.abs(t.y - tile.y) < tileHeight - 10;
-                
                 return overlapX && overlapY;
             });
             
-            if (hasTileAbove) return false; // Заблокирована плиткой сверху
+            if (hasTileAbove) return false;
             
-            // Проверяем левую сторону
             var leftBlocked = tiles.some(function(t) {
                 if (t.removed || t.z !== tile.z) return false;
-                
                 var sameRow = Math.abs(t.y - tile.y) < 20;
                 var onLeft = t.x === tile.x - tileWidth;
-                
                 return sameRow && onLeft;
             });
             
-            // Проверяем правую сторону
             var rightBlocked = tiles.some(function(t) {
                 if (t.removed || t.z !== tile.z) return false;
-                
                 var sameRow = Math.abs(t.y - tile.y) < 20;
                 var onRight = t.x === tile.x + tileWidth;
-                
                 return sameRow && onRight;
             });
             
-            // Свободна если хотя бы одна сторона открыта
             return !leftBlocked || !rightBlocked;
         }
 
@@ -549,7 +531,6 @@
         }
 
         function onTileClick(tile) {
-            // Нельзя кликать заблокированные плитки
             if (tile.removed || !isTileFree(tile)) {
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
@@ -557,7 +538,6 @@
                 return;
             }
             
-            // Снимаем выделение с той же плитки
             if (selectedTile === tile) {
                 tile.element.classList.remove('selected');
                 selectedTile = null;
@@ -567,12 +547,10 @@
             tile.element.classList.add('selected');
             
             if (selectedTile) {
-                // Проверяем совпадение
                 if (selectedTile.symbol === tile.symbol) {
                     matchTiles(selectedTile, tile);
                     selectedTile = null;
                 } else {
-                    // Нет совпадения - переключаем выделение
                     selectedTile.element.classList.remove('selected');
                     selectedTile = tile;
                 }
