@@ -37,7 +37,7 @@
         }
         
         .title {
-            font-size: 18px;
+            font-size: 22px;
             color: #ffd700;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             font-weight: bold;
@@ -45,71 +45,72 @@
         
         .stats {
             display: flex;
-            gap: 4px;
+            gap: 6px;
             justify-content: center;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             width: 100%;
         }
         
         .stat-box {
             background: rgba(255, 255, 255, 0.15);
-            padding: 4px 8px;
-            border-radius: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
             border: 2px solid #ffd700;
             text-align: center;
             flex: 1;
-            max-width: 65px;
+            max-width: 80px;
         }
         
         .stat-label {
             color: #fff;
-            font-size: 8px;
+            font-size: 10px;
             text-transform: uppercase;
         }
         
         .stat-value {
             color: #ffd700;
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 700;
         }
         
         .timer {
             color: #ffd700;
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 700;
         }
         
-        /* Игровое поле - адаптивное */
+        /* Игровое поле - больше для 100+ плиток */
         .game-board {
             position: relative;
             background: #2d5a3f;
-            border-radius: 8px;
-            padding: 8px;
+            border-radius: 10px;
+            padding: 10px;
             border: 3px solid #8b4513;
             width: 100%;
-            max-width: 340px;
-            height: 440px;
+            max-width: 380px;
+            height: 520px;
             flex-shrink: 0;
             overflow: hidden;
         }
         
-        /* Плитка - базовый размер */
+        /* Плитка - КРУПНАЯ */
         .tile {
             position: absolute;
-            width: 32px;
-            height: 44px;
+            width: 42px;
+            height: 56px;
             background: linear-gradient(145deg, #f8f4e6 0%, #e8dcc8 100%);
-            border-radius: 4px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 28px;
             cursor: pointer;
             box-shadow: 
-                1px 1px 2px rgba(0,0,0,0.4),
-                2px 2px 3px rgba(0,0,0,0.3);
+                2px 2px 4px rgba(0,0,0,0.5),
+                3px 3px 6px rgba(0,0,0,0.4);
             border: 1px solid #c9b896;
             z-index: 1;
+            transition: transform 0.2s;
         }
         
         .tile[data-type="bamboo"], .tile[data-type="character"] {
@@ -126,42 +127,48 @@
         
         .tile.selected {
             background: #ffd700;
-            box-shadow: 0 0 10px #ffd700, 1px 1px 2px rgba(0,0,0,0.4);
+            box-shadow: 0 0 15px #ffd700, 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 100;
+            transform: scale(1.08);
         }
         
         .tile.blocked {
-            filter: brightness(0.55);
+            filter: brightness(0.5);
             cursor: not-allowed;
+        }
+        
+        .tile.free {
+            filter: brightness(1);
         }
         
         .tile.matched {
             opacity: 0;
-            transition: opacity 0.3s;
+            transform: scale(0.8);
+            transition: all 0.3s;
         }
         
         .controls {
-            margin-top: 8px;
+            margin-top: 10px;
             display: flex;
-            gap: 4px;
+            gap: 6px;
             flex-wrap: wrap;
             justify-content: center;
             width: 100%;
-            max-width: 340px;
+            max-width: 380px;
             z-index: 1000;
             position: relative;
         }
         
         .btn {
-            padding: 8px 10px;
-            font-size: 10px;
+            padding: 10px 14px;
+            font-size: 11px;
             font-weight: bold;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             text-transform: uppercase;
             flex: 1;
-            min-width: 75px;
+            min-width: 90px;
         }
         
         .btn-primary {
@@ -175,9 +182,9 @@
         }
         
         .hints {
-            margin-top: 5px;
+            margin-top: 6px;
             color: #fff;
-            font-size: 9px;
+            font-size: 10px;
             text-align: center;
             opacity: 0.7;
         }
@@ -201,76 +208,54 @@
         
         .modal-content {
             background: linear-gradient(145deg, #1a472a 0%, #2d5a3f 100%);
-            padding: 20px 15px;
-            border-radius: 12px;
+            padding: 25px 20px;
+            border-radius: 15px;
             text-align: center;
             border: 3px solid #ffd700;
             max-width: 85%;
         }
         
         .modal-title {
-            font-size: 20px;
+            font-size: 24px;
             color: #ffd700;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-weight: bold;
         }
         
         .modal-text {
-            font-size: 13px;
+            font-size: 15px;
             color: #fff;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
         
-        /* Адаптация под РАЗНЫЕ экраны телефонов */
+        /* Адаптация под экраны */
         @media (max-width: 360px) {
             .game-board {
-                max-width: 300px;
-                height: 400px;
-                padding: 6px;
+                max-width: 340px;
+                height: 480px;
             }
             .tile {
-                width: 28px;
-                height: 40px;
-                font-size: 18px;
-            }
-            .title {
-                font-size: 16px;
-            }
-            .btn {
-                padding: 7px 8px;
-                font-size: 9px;
-                min-width: 70px;
+                width: 38px;
+                height: 52px;
+                font-size: 26px;
             }
         }
         
         @media (max-width: 330px) {
             .game-board {
-                max-width: 280px;
-                height: 380px;
-                padding: 5px;
+                max-width: 310px;
+                height: 450px;
             }
             .tile {
-                width: 26px;
-                height: 38px;
-                font-size: 16px;
+                width: 36px;
+                height: 50px;
+                font-size: 24px;
             }
         }
         
-        @media (min-width: 400px) {
+        @media (min-height: 750px) {
             .game-board {
-                max-width: 360px;
-                height: 460px;
-            }
-            .tile {
-                width: 34px;
-                height: 46px;
-                font-size: 22px;
-            }
-        }
-        
-        @media (min-height: 800px) {
-            .game-board {
-                height: 500px;
+                height: 560px;
             }
         }
     </style>
@@ -303,11 +288,12 @@
         <button class="btn btn-secondary" onclick="showHint()">Подсказка</button>
     </div>
     
-    <div class="hints">Нажмите на две одинаковые плитки</div>
+    <div class="hints">Нажмите на две одинаковые СВОБОДНЫЕ плитки</div>
     
     <div class="modal" id="winModal">
         <div class="modal-content">
             <div class="modal-title">🎉 Победа!</div>
+            <div class="modal-text">Вы очистили все плитки!</div>
             <div class="modal-text">Счёт: <span id="finalScore">0</span></div>
             <div class="modal-text">Время: <span id="finalTime">00:00</span></div>
             <button class="btn btn-primary" onclick="resetGame()">Играть снова</button>
@@ -317,6 +303,7 @@
     <div class="modal" id="noMovesModal">
         <div class="modal-content">
             <div class="modal-title">⚠️ Нет ходов!</div>
+            <div class="modal-text">Доступных пар не осталось</div>
             <button class="btn btn-primary" onclick="shuffleTiles()">Перемешать</button>
         </div>
     </div>
@@ -336,6 +323,7 @@
             text_color: '#ffd700'
         });
         
+        // 36 уникальных символов × 3 = 108 плиток (54 пары)
         var tileSymbols = [
             { symbol: '🀀', type: 'wind' }, { symbol: '🀁', type: 'wind' },
             { symbol: '🀂', type: 'wind' }, { symbol: '🀃', type: 'wind' },
@@ -366,69 +354,19 @@
         var timerInterval = null;
         var totalPairs = 0;
         
-        // Динамические размеры - вычисляются при загрузке
-        var tileWidth = 32;
-        var tileHeight = 44;
-        var tileStepX = 34;
-        var tileStepY = 46;
-        var boardWidth = 340;
-        var boardHeight = 440;
-        var padding = 8;
-        var cols = 8;
-        var rows = 6;
+        // Размеры плиток
+        var tileWidth = 42;
+        var tileHeight = 56;
+        var tileStepX = 44;
+        var tileStepY = 58;
+        var padding = 10;
 
-        // Вычисление размеров под экран
-        function calculateSizes() {
-            var screenWidth = window.innerWidth - 20;
-            var screenHeight = window.innerHeight - 150;
-            
-            // Определяем максимальную ширину поля
-            if (screenWidth < 320) {
-                boardWidth = 280;
-                tileWidth = 26;
-                tileStepX = 28;
-            } else if (screenWidth < 360) {
-                boardWidth = 300;
-                tileWidth = 28;
-                tileStepX = 30;
-            } else if (screenWidth < 400) {
-                boardWidth = 340;
-                tileWidth = 32;
-                tileStepX = 34;
-            } else {
-                boardWidth = 360;
-                tileWidth = 34;
-                tileStepX = 36;
-            }
-            
-            // Высота под экран
-            if (screenHeight < 450) {
-                boardHeight = 380;
-                tileHeight = 38;
-                tileStepY = 40;
-            } else if (screenHeight < 550) {
-                boardHeight = 440;
-                tileHeight = 44;
-                tileStepY = 46;
-            } else {
-                boardHeight = 500;
-                tileHeight = 48;
-                tileStepY = 50;
-            }
-            
-            // Обновляем CSS переменные
-            document.documentElement.style.setProperty('--tile-width', tileWidth + 'px');
-            document.documentElement.style.setProperty('--tile-height', tileHeight + 'px');
-            document.documentElement.style.setProperty('--board-width', boardWidth + 'px');
-            document.documentElement.style.setProperty('--board-height', boardHeight + 'px');
-        }
-
-        // Упрощённая раскладка - меньше плиток для мобильных
+        // Раскладка "Черепаха" - 4 яруса, 108 плиток
         function getTilePositions() {
             var positions = [];
             
-            // Слой 0 - 8×5 = 40 плиток
-            for (var row = 0; row < 5; row++) {
+            // ЯРУС 0 (база) - 8×6 = 48 плиток
+            for (var row = 0; row < 6; row++) {
                 for (var col = 0; col < 8; col++) {
                     positions.push({
                         x: padding + col * tileStepX,
@@ -438,8 +376,8 @@
                 }
             }
             
-            // Слой 1 - 6×2 = 12 плиток
-            for (var row = 0; row < 2; row++) {
+            // ЯРУС 1 - 6×4 = 24 плитки
+            for (var row = 0; row < 4; row++) {
                 for (var col = 0; col < 6; col++) {
                     positions.push({
                         x: padding + tileStepX + col * tileStepX,
@@ -449,26 +387,39 @@
                 }
             }
             
-            // Слой 2 - 4×1 = 4 плитки
-            for (var col = 0; col < 4; col++) {
-                positions.push({
-                    x: padding + 2 * tileStepX + col * tileStepX,
-                    y: padding + 2 * tileStepY,
-                    z: 2
-                });
+            // ЯРУС 2 - 4×3 = 12 плиток
+            for (var row = 0; row < 3; row++) {
+                for (var col = 0; col < 4; col++) {
+                    positions.push({
+                        x: padding + 2 * tileStepX + col * tileStepX,
+                        y: padding + 2 * tileStepY + row * tileStepY,
+                        z: 2
+                    });
+                }
             }
             
-            // Слой 3 - 2 плитки вершина
-            positions.push({ 
-                x: padding + 3 * tileStepX, 
-                y: padding + 3 * tileStepY, 
-                z: 3 
-            });
-            positions.push({ 
-                x: padding + 4 * tileStepX, 
-                y: padding + 3 * tileStepY, 
-                z: 3 
-            });
+            // ЯРУС 3 (вершина) - 4×2 = 8 плиток
+            for (var row = 0; row < 2; row++) {
+                for (var col = 0; col < 4; col++) {
+                    positions.push({
+                        x: padding + 2.5 * tileStepX + col * tileStepX,
+                        y: padding + 3 * tileStepY + row * tileStepY,
+                        z: 3
+                    });
+                }
+            }
+            
+            // ЯРУС 4 (пик) - 2×2 = 4 плитки
+            positions.push({ x: padding + 3 * tileStepX, y: padding + 4 * tileStepY, z: 4 });
+            positions.push({ x: padding + 4 * tileStepX, y: padding + 4 * tileStepY, z: 4 });
+            positions.push({ x: padding + 3 * tileStepX, y: padding + 4.5 * tileStepY, z: 4 });
+            positions.push({ x: padding + 4 * tileStepX, y: padding + 4.5 * tileStepY, z: 4 });
+            
+            // Крылья по бокам (добавочные)
+            positions.push({ x: padding - tileStepX, y: padding + 2.5 * tileStepY, z: 0 });
+            positions.push({ x: padding + 8 * tileStepX, y: padding + 2.5 * tileStepY, z: 0 });
+            positions.push({ x: padding - tileStepX, y: padding + 3.5 * tileStepY, z: 0 });
+            positions.push({ x: padding + 8 * tileStepX, y: padding + 3.5 * tileStepY, z: 0 });
             
             return positions;
         }
@@ -478,12 +429,14 @@
             var numPairs = Math.floor(positions.length / 2);
             var selectedSymbols = [];
             
+            // Берём символы циклично для 100+ плиток
             for (var i = 0; i < numPairs; i++) {
                 var tileData = tileSymbols[i % tileSymbols.length];
                 selectedSymbols.push({ symbol: tileData.symbol, type: tileData.type });
                 selectedSymbols.push({ symbol: tileData.symbol, type: tileData.type });
             }
             
+            // Перемешивание Фишера-Йетса
             for (var i = selectedSymbols.length - 1; i > 0; i--) {
                 var j = Math.floor(Math.random() * (i + 1));
                 var temp = selectedSymbols[i];
@@ -512,8 +465,6 @@
             if (!board) return;
             
             board.innerHTML = '';
-            board.style.width = boardWidth + 'px';
-            board.style.height = boardHeight + 'px';
             
             tiles.forEach(function(tile) {
                 if (tile.removed) return;
@@ -524,7 +475,7 @@
                 element.setAttribute('data-type', tile.type);
                 element.style.width = tileWidth + 'px';
                 element.style.height = tileHeight + 'px';
-                element.style.fontSize = (tileWidth * 0.6) + 'px';
+                element.style.fontSize = (tileWidth * 0.65) + 'px';
                 element.style.left = tile.x + 'px';
                 element.style.top = tile.y + 'px';
                 element.style.zIndex = tile.z + 1;
@@ -542,45 +493,71 @@
             }, 50);
         }
 
-        function isTileBlocked(tile) {
+        // ПРОВЕРКА: плитка свободна только если:
+        // 1. Нет плитки НАД ней (сверху по Z)
+        // 2. Свободна ЛЕВАЯ или ПРАВАЯ сторона
+        function isTileFree(tile) {
+            // Проверяем есть ли плитка сверху (на более высоком ярусе)
             var hasTileAbove = tiles.some(function(t) {
-                return !t.removed && t.z > tile.z &&
-                    Math.abs(t.x - tile.x) < tileWidth - 5 &&
-                    Math.abs(t.y - tile.y) < tileHeight - 5;
+                if (t.removed || t.z <= tile.z) return false;
+                
+                // Плитка сверху перекрывает эту
+                var overlapX = Math.abs(t.x - tile.x) < tileWidth - 10;
+                var overlapY = Math.abs(t.y - tile.y) < tileHeight - 10;
+                
+                return overlapX && overlapY;
             });
             
-            if (hasTileAbove) return true;
+            if (hasTileAbove) return false; // Заблокирована плиткой сверху
             
+            // Проверяем левую сторону
             var leftBlocked = tiles.some(function(t) {
-                return !t.removed && t.z === tile.z &&
-                    Math.abs(t.y - tile.y) < 20 &&
-                    t.x === tile.x - tileWidth;
+                if (t.removed || t.z !== tile.z) return false;
+                
+                var sameRow = Math.abs(t.y - tile.y) < 20;
+                var onLeft = t.x === tile.x - tileWidth;
+                
+                return sameRow && onLeft;
             });
             
+            // Проверяем правую сторону
             var rightBlocked = tiles.some(function(t) {
-                return !t.removed && t.z === tile.z &&
-                    Math.abs(t.y - tile.y) < 20 &&
-                    t.x === tile.x + tileWidth;
+                if (t.removed || t.z !== tile.z) return false;
+                
+                var sameRow = Math.abs(t.y - tile.y) < 20;
+                var onRight = t.x === tile.x + tileWidth;
+                
+                return sameRow && onRight;
             });
             
-            return leftBlocked && rightBlocked;
+            // Свободна если хотя бы одна сторона открыта
+            return !leftBlocked || !rightBlocked;
         }
 
         function updateBlockedStatus() {
             tiles.forEach(function(tile) {
                 if (tile.element && !tile.removed) {
-                    if (isTileBlocked(tile)) {
-                        tile.element.classList.add('blocked');
-                    } else {
+                    if (isTileFree(tile)) {
                         tile.element.classList.remove('blocked');
+                        tile.element.classList.add('free');
+                    } else {
+                        tile.element.classList.add('blocked');
+                        tile.element.classList.remove('free');
                     }
                 }
             });
         }
 
         function onTileClick(tile) {
-            if (tile.removed || isTileBlocked(tile)) return;
+            // Нельзя кликать заблокированные плитки
+            if (tile.removed || !isTileFree(tile)) {
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+                return;
+            }
             
+            // Снимаем выделение с той же плитки
             if (selectedTile === tile) {
                 tile.element.classList.remove('selected');
                 selectedTile = null;
@@ -590,10 +567,12 @@
             tile.element.classList.add('selected');
             
             if (selectedTile) {
+                // Проверяем совпадение
                 if (selectedTile.symbol === tile.symbol) {
                     matchTiles(selectedTile, tile);
                     selectedTile = null;
                 } else {
+                    // Нет совпадения - переключаем выделение
                     selectedTile.element.classList.remove('selected');
                     selectedTile = tile;
                 }
@@ -636,12 +615,13 @@
         }
 
         function hasAvailableMoves() {
-            var availableTiles = tiles.filter(function(t) {
-                return !t.removed && !isTileBlocked(t);
+            var freeTiles = tiles.filter(function(t) {
+                return !t.removed && isTileFree(t);
             });
-            for (var i = 0; i < availableTiles.length; i++) {
-                for (var j = i + 1; j < availableTiles.length; j++) {
-                    if (availableTiles[i].symbol === availableTiles[j].symbol) {
+            
+            for (var i = 0; i < freeTiles.length; i++) {
+                for (var j = i + 1; j < freeTiles.length; j++) {
+                    if (freeTiles[i].symbol === freeTiles[j].symbol) {
                         return true;
                     }
                 }
@@ -687,10 +667,10 @@
         }
 
         function shuffleTiles() {
-            var availableTiles = tiles.filter(function(t) {
-                return !t.removed;
+            var freeTiles = tiles.filter(function(t) {
+                return !t.removed && isTileFree(t);
             });
-            var symbols = availableTiles.map(function(t) {
+            var symbols = freeTiles.map(function(t) {
                 return { symbol: t.symbol, type: t.type };
             });
             
@@ -701,7 +681,7 @@
                 symbols[j] = temp;
             }
             
-            availableTiles.forEach(function(tile, index) {
+            freeTiles.forEach(function(tile, index) {
                 tile.symbol = symbols[index].symbol;
                 tile.type = symbols[index].type;
                 if (tile.element) {
@@ -725,9 +705,6 @@
             pairs = 0;
             selectedTile = null;
             
-            // Пересчитываем размеры перед новой игрой
-            calculateSizes();
-            
             tiles = [];
             createTiles();
             renderTiles();
@@ -739,13 +716,7 @@
             resetGame();
         });
 
-        // Обработка изменения размера окна
-        window.addEventListener('resize', function() {
-            calculateSizes();
-        });
-
         window.addEventListener('load', function() {
-            calculateSizes();
             setTimeout(function() {
                 resetGame();
             }, 100);
