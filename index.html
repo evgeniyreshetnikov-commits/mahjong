@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
     <title>🀄 Маджонг</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -13,158 +11,153 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            /* Отключаем размытие шрифтов */
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            text-rendering: optimizeLegibility;
         }
         
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            /* Предотвращаем масштабирование */
-            touch-action: none;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(180deg, #1a472a 0%, #2d5a3f 100%);
         }
         
         body {
-            background: linear-gradient(180deg, #1a472a 0%, #2d5a3f 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 5px;
-            min-height: 100vh;
+            padding: 8px;
         }
         
         .game-header {
             text-align: center;
-            margin-bottom: 5px;
-            width: 100%;
-        }
-        
-        .title {
-            font-size: 24px;
-            color: #ffd700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            font-weight: bold;
-        }
-        
-        .stats {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
             margin-bottom: 8px;
             width: 100%;
         }
         
+        .title {
+            font-size: 26px;
+            color: #ffd700;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px #000;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        
         .stat-box {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 14px;
             border-radius: 8px;
             border: 2px solid #ffd700;
             text-align: center;
-            flex: 1;
-            max-width: 80px;
+            min-width: 75px;
         }
         
         .stat-label {
             color: #fff;
-            font-size: 10px;
+            font-size: 11px;
             text-transform: uppercase;
         }
         
         .stat-value {
             color: #ffd700;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
         }
         
-        .timer {
-            color: #ffd700;
-            font-size: 16px;
-            font-weight: 700;
-        }
-        
+        /* ПОЛЕ БОЛЬШЕ */
         .game-board {
             position: relative;
             background: #2d5a3f;
-            border-radius: 10px;
-            padding: 12px;
-            border: 3px solid #8b4513;
+            border-radius: 12px;
+            padding: 15px;
+            border: 4px solid #8b4513;
             width: 100%;
-            max-width: 400px;
-            height: 560px;
+            max-width: 420px;
+            height: 580px;
             flex-shrink: 0;
-            overflow: hidden;
-            /* Улучшаем рендеринг */
-            transform: translateZ(0);
-            backface-visibility: hidden;
+            overflow: visible;
         }
         
-        /* Плитка - БЕЗ transform для чёткости */
+        /* ПЛИТКА ЗНАЧИТЕЛЬНО БОЛЬШЕ */
         .tile {
             position: absolute;
-            width: 44px;
-            height: 58px;
-            background: linear-gradient(145deg, #fffef0 0%, #f0e6d2 100%);
-            border-radius: 6px;
+            width: 52px;
+            height: 68px;
+            background: linear-gradient(145deg, #fffef5 0%, #f5ebd5 100%);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             box-shadow: 
-                2px 2px 4px rgba(0,0,0,0.5),
-                3px 3px 6px rgba(0,0,0,0.4);
-            border: 2px solid #c9b896;
+                3px 3px 6px rgba(0,0,0,0.6),
+                4px 4px 8px rgba(0,0,0,0.4);
+            border: 3px solid #d4c4a8;
             z-index: 1;
-            /* Отключаем сглаживание которое вызывает размытие */
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
         }
         
-        /* Символ - ОЧЕНЬ КРУПНЫЙ для мобильных */
-        .tile-symbol {
-            font-size: 42px;
+        /* КОНТЕЙНЕР СИМВОЛА */
+        .tile-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
             font-weight: 900;
             line-height: 1;
-            display: block;
-            /* Контур для читаемости */
+        }
+        
+        /* МАКСИМАЛЬНЫЙ КОНТРАСТ ЦВЕТОВ */
+        .tile[data-type="bamboo"] .tile-content,
+        .tile[data-type="character"] .tile-content {
+            color: #000000;
             text-shadow: 
-                -1px -1px 0 #000,
-                1px -1px 0 #000,
-                -1px 1px 0 #000,
-                1px 1px 0 #000,
-                0 0 10px rgba(0,0,0,0.5);
-            filter: contrast(1.3) brightness(1.1);
+                2px 2px 0 #fff,
+                -2px -2px 0 #fff,
+                2px -2px 0 #fff,
+                -2px 2px 0 #fff,
+                0 0 20px rgba(0,0,0,0.8);
         }
         
-        /* Цвета - МАКСИМАЛЬНЫЙ КОНТРАСТ */
-        .tile[data-type="bamboo"] .tile-symbol,
-        .tile[data-type="character"] .tile-symbol {
-            color: #003d00;
+        .tile[data-type="circle"] .tile-content,
+        .tile[data-type="dragon"] .tile-content {
+            color: #d00000;
+            text-shadow: 
+                2px 2px 0 #fff,
+                -2px -2px 0 #fff,
+                2px -2px 0 #fff,
+                -2px 2px 0 #fff,
+                0 0 20px rgba(0,0,0,0.8);
         }
         
-        .tile[data-type="circle"] .tile-symbol,
-        .tile[data-type="dragon"] .tile-symbol {
-            color: #b30000;
-        }
-        
-        .tile[data-type="wind"] .tile-symbol,
-        .tile[data-type="flower"] .tile-symbol {
-            color: #00004d;
+        .tile[data-type="wind"] .tile-content,
+        .tile[data-type="flower"] .tile-content {
+            color: #000080;
+            text-shadow: 
+                2px 2px 0 #fff,
+                -2px -2px 0 #fff,
+                2px -2px 0 #fff,
+                -2px 2px 0 #fff,
+                0 0 20px rgba(0,0,0,0.8);
         }
         
         .tile.selected {
-            background: #ffd700;
-            box-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700, 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(145deg, #ffd700 0%, #ffaa00 100%);
+            box-shadow: 0 0 30px #ffd700, 0 0 60px #ffd700, 3px 3px 6px rgba(0,0,0,0.6);
             z-index: 100;
-            border: 3px solid #ff8800;
+            border: 4px solid #ff6600;
+            transform: scale(1.1);
         }
         
         .tile.blocked {
-            filter: brightness(0.35);
+            filter: brightness(0.3);
             cursor: not-allowed;
         }
         
@@ -174,43 +167,43 @@
         
         .tile.matched {
             opacity: 0;
-            transform: scale(0.8);
+            transform: scale(0.7);
             transition: all 0.3s;
         }
         
         .tile.hint {
-            box-shadow: 0 0 25px #00ff00, 0 0 50px #00ff00 !important;
+            box-shadow: 0 0 30px #00ff00, 0 0 60px #00ff00 !important;
             z-index: 101;
-            animation: pulse 0.5s ease-in-out infinite;
+            animation: pulse 0.6s ease-in-out infinite;
+            border: 4px solid #00ff00;
         }
         
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+            50% { transform: scale(1.12); }
         }
         
         .controls {
-            margin-top: 10px;
+            margin-top: 12px;
             display: flex;
-            gap: 6px;
+            gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             z-index: 1000;
-            position: relative;
         }
         
         .btn {
-            padding: 12px 16px;
-            font-size: 13px;
+            padding: 14px 18px;
+            font-size: 14px;
             font-weight: bold;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             text-transform: uppercase;
             flex: 1;
-            min-width: 90px;
+            min-width: 100px;
         }
         
         .btn-primary {
@@ -224,9 +217,9 @@
         }
         
         .hints {
-            margin-top: 6px;
+            margin-top: 8px;
             color: #fff;
-            font-size: 11px;
+            font-size: 12px;
             text-align: center;
             opacity: 0.8;
         }
@@ -250,87 +243,74 @@
         
         .modal-content {
             background: linear-gradient(145deg, #1a472a 0%, #2d5a3f 100%);
-            padding: 25px 20px;
+            padding: 30px 25px;
             border-radius: 15px;
             text-align: center;
-            border: 3px solid #ffd700;
+            border: 4px solid #ffd700;
             max-width: 85%;
         }
         
         .modal-title {
-            font-size: 26px;
+            font-size: 28px;
             color: #ffd700;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
             font-weight: bold;
         }
         
         .modal-text {
-            font-size: 16px;
+            font-size: 17px;
             color: #fff;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
         
-        /* 🔥 КРИТИЧНО: Адаптация под РАЗНЫЕ телефоны */
-        @media (max-width: 375px) {
+        /* АДАПТАЦИЯ ПОД РАЗНЫЕ ЭКРАНЫ */
+        @media (max-width: 380px) {
             .game-board {
-                max-width: 350px;
+                max-width: 360px;
                 height: 540px;
-                padding: 10px;
+                padding: 12px;
             }
             .tile {
-                width: 42px;
-                height: 56px;
+                width: 48px;
+                height: 64px;
             }
-            .tile-symbol {
-                font-size: 40px;
+            .tile-content {
+                font-size: 44px;
             }
         }
         
         @media (max-width: 350px) {
             .game-board {
-                max-width: 320px;
+                max-width: 330px;
                 height: 500px;
-                padding: 8px;
+                padding: 10px;
             }
             .tile {
-                width: 40px;
-                height: 54px;
+                width: 44px;
+                height: 60px;
             }
-            .tile-symbol {
-                font-size: 38px;
+            .tile-content {
+                font-size: 40px;
             }
         }
         
-        @media (min-width: 400px) {
+        @media (min-width: 420px) {
             .game-board {
-                max-width: 420px;
-                height: 580px;
+                max-width: 450px;
+                height: 620px;
             }
             .tile {
-                width: 46px;
-                height: 60px;
+                width: 56px;
+                height: 72px;
             }
-            .tile-symbol {
-                font-size: 44px;
+            .tile-content {
+                font-size: 52px;
             }
         }
         
         @media (min-height: 850px) {
             .game-board {
-                height: 620px;
-            }
-        }
-        
-        /* Для экранов с высоким DPI (Retina) */
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .tile-symbol {
-                font-size: 44px;
-                text-shadow: 
-                    -1px -1px 0 #000,
-                    1px -1px 0 #000,
-                    -1px 1px 0 #000,
-                    1px 1px 0 #000,
-                    0 0 15px rgba(0,0,0,0.6);
+                height: 650px;
             }
         }
     </style>
@@ -351,7 +331,7 @@
         </div>
         <div class="stat-box">
             <div class="stat-label">Время</div>
-            <div class="timer" id="timer">00:00</div>
+            <div class="stat-value" id="timer">00:00</div>
         </div>
     </div>
     
@@ -398,6 +378,7 @@
             text_color: '#ffd700'
         });
         
+        // Символы маджонга
         var tileSymbols = [
             { symbol: '🀀', type: 'wind' }, { symbol: '🀁', type: 'wind' },
             { symbol: '🀂', type: 'wind' }, { symbol: '🀃', type: 'wind' },
@@ -428,15 +409,16 @@
         var timerInterval = null;
         var totalPairs = 0;
         
-        var tileWidth = 44;
-        var tileHeight = 58;
-        var tileStepX = 46;
-        var tileStepY = 60;
-        var padding = 12;
+        var tileWidth = 52;
+        var tileHeight = 68;
+        var tileStepX = 54;
+        var tileStepY = 70;
+        var padding = 15;
 
         function getTilePositions() {
             var positions = [];
             
+            // 6 ярусов для 100+ плиток
             for (var row = 0; row < 6; row++) {
                 for (var col = 0; col < 7; col++) {
                     positions.push({
@@ -545,10 +527,10 @@
                 element.style.top = tile.y + 'px';
                 element.style.zIndex = tile.z + 1;
                 
-                var symbolEl = document.createElement('span');
-                symbolEl.className = 'tile-symbol';
-                symbolEl.textContent = tile.symbol;
-                element.appendChild(symbolEl);
+                var contentEl = document.createElement('div');
+                contentEl.className = 'tile-content';
+                contentEl.textContent = tile.symbol;
+                element.appendChild(contentEl);
                 
                 element.addEventListener('click', function() {
                     onTileClick(tile);
@@ -765,7 +747,7 @@
                 tile.symbol = symbols[index].symbol;
                 tile.type = symbols[index].type;
                 if (tile.element) {
-                    tile.element.querySelector('.tile-symbol').textContent = tile.symbol;
+                    tile.element.querySelector('.tile-content').textContent = tile.symbol;
                     tile.element.setAttribute('data-type', tile.type);
                 }
             });
