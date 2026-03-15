@@ -615,10 +615,6 @@
         crown: { name: "Корона", build: buildCrownLayout }
       };
 
-      function getDifficultyProfile() {
-        return difficultyProfiles[currentDifficulty];
-      }
-
       function updateDifficultyUI() {
         difficultyBadgeEl.textContent = "Сложность: " + getDifficultyProfile().name;
 
@@ -632,6 +628,10 @@
         currentDifficulty = level;
         updateDifficultyUI();
         resetGame();
+      }
+
+      function getDifficultyProfile() {
+        return difficultyProfiles[currentDifficulty];
       }
 
       function impact(type) {
@@ -692,6 +692,34 @@
             z: z
           });
         }
+      }
+
+      function extendLayoutDown(positions) {
+        if (!positions || !positions.length) return positions;
+
+        var minCol = Infinity;
+        var maxCol = -Infinity;
+        var maxRow = -Infinity;
+        var i;
+
+        for (i = 0; i < positions.length; i++) {
+          var p = positions[i];
+          var colApprox = Math.round((p.x - padding) / tileStepX);
+          var rowApprox = Math.round((p.y - padding) / tileStepY);
+
+          if (colApprox < minCol) minCol = colApprox;
+          if (colApprox > maxCol) maxCol = colApprox;
+          if (rowApprox > maxRow) maxRow = rowApprox;
+        }
+
+        var extraWidth = 6;
+        var startCol = Math.round((minCol + maxCol - extraWidth + 1) / 2);
+        var startRow = maxRow + 1;
+
+        addRect(positions, startCol, startRow, extraWidth, 1, 0);
+        addRect(positions, startCol, startRow + 1, extraWidth, 1, 0);
+
+        return positions;
       }
 
       function buildPyramidLayout() {
@@ -783,22 +811,8 @@
       }
 
       function getLayoutPositions() {
-        return layouts[currentLayoutKey].build();
-      }
-
-      function chooseRandomLayout() {
-        var keys = Object.keys(layouts);
-        var available = keys.slice();
-
-        if (previousLayoutKey && available.length > 1) {
-          available = available.filter(function (key) {
-            return key !== previousLayoutKey;
-          });
-        }
-
-        currentLayoutKey = available[Math.floor(Math.random() * available.length)];
-        previousLayoutKey = currentLayoutKey;
-        layoutBadgeEl.textContent = "Раскладка: " + layouts[currentLayoutKey].name;
+        var positions = layouts[currentLayoutKey].build();
+        return extendLayoutDown(positions);
       }
 
       function calculateLayoutBounds() {
@@ -832,11 +846,11 @@
         var difficultyApprox = 48;
         var controlsApprox = 58;
         var hintsApprox = 22;
-        var extraSpacing = 56;
+        var extraSpacing = 40;
         var availableHeight = window.innerHeight - statsApprox - headerApprox - difficultyApprox - controlsApprox - hintsApprox - extraSpacing;
 
-        if (availableHeight < 400) {
-          availableHeight = 400;
+        if (availableHeight < 470) {
+          availableHeight = 470;
         }
 
         calculateLayoutBounds();
