@@ -2,7 +2,9 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>🀄 Маджонг</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -12,6 +14,10 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
+            /* Отключаем размытие шрифтов */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
         
         html, body {
@@ -19,6 +25,8 @@
             height: 100%;
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            /* Предотвращаем масштабирование */
+            touch-action: none;
         }
         
         body {
@@ -37,7 +45,7 @@
         }
         
         .title {
-            font-size: 22px;
+            font-size: 24px;
             color: #ffd700;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             font-weight: bold;
@@ -90,13 +98,16 @@
             height: 560px;
             flex-shrink: 0;
             overflow: hidden;
+            /* Улучшаем рендеринг */
+            transform: translateZ(0);
+            backface-visibility: hidden;
         }
         
-        /* Плитка - светлая для контраста */
+        /* Плитка - БЕЗ transform для чёткости */
         .tile {
             position: absolute;
-            width: 42px;
-            height: 56px;
+            width: 44px;
+            height: 58px;
             background: linear-gradient(145deg, #fffef0 0%, #f0e6d2 100%);
             border-radius: 6px;
             display: flex;
@@ -108,72 +119,52 @@
                 3px 3px 6px rgba(0,0,0,0.4);
             border: 2px solid #c9b896;
             z-index: 1;
+            /* Отключаем сглаживание которое вызывает размытие */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
         
-        /* Символ на ВСЮ плитку - крупный и контрастный */
+        /* Символ - ОЧЕНЬ КРУПНЫЙ для мобильных */
         .tile-symbol {
-            font-size: 38px;
-            font-weight: bold;
+            font-size: 42px;
+            font-weight: 900;
             line-height: 1;
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.8));
-            /* Увеличиваем контрастность */
-            -webkit-filter: contrast(1.2);
-            filter: contrast(1.2);
-        }
-        
-        /* Цвета символов - МАКСИМАЛЬНЫЙ КОНТРАСТ */
-        .tile[data-type="bamboo"] .tile-symbol {
-            color: #004d00;
+            display: block;
+            /* Контур для читаемости */
             text-shadow: 
-                0 0 3px #000,
-                0 0 5px #000;
+                -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px 1px 0 #000,
+                1px 1px 0 #000,
+                0 0 10px rgba(0,0,0,0.5);
+            filter: contrast(1.3) brightness(1.1);
         }
         
+        /* Цвета - МАКСИМАЛЬНЫЙ КОНТРАСТ */
+        .tile[data-type="bamboo"] .tile-symbol,
         .tile[data-type="character"] .tile-symbol {
-            color: #004d00;
-            text-shadow: 
-                0 0 3px #000,
-                0 0 5px #000;
+            color: #003d00;
         }
         
-        .tile[data-type="circle"] .tile-symbol {
-            color: #cc0000;
-            text-shadow: 
-                0 0 3px #000,
-                0 0 5px #000;
-        }
-        
+        .tile[data-type="circle"] .tile-symbol,
         .tile[data-type="dragon"] .tile-symbol {
-            color: #cc0000;
-            text-shadow: 
-                0 0 3px #000,
-                0 0 5px #000;
+            color: #b30000;
         }
         
-        .tile[data-type="wind"] .tile-symbol {
-            color: #000066;
-            text-shadow: 
-                0 0 3px #000,
-                0 0 5px #000;
-        }
-        
+        .tile[data-type="wind"] .tile-symbol,
         .tile[data-type="flower"] .tile-symbol {
-            color: #000066;
-            text-shadow: 
-                0 0 3px #000,
-                0 0 5px #000;
+            color: #00004d;
         }
         
         .tile.selected {
             background: #ffd700;
             box-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700, 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 100;
-            transform: scale(1.1);
             border: 3px solid #ff8800;
         }
         
         .tile.blocked {
-            filter: brightness(0.4);
+            filter: brightness(0.35);
             cursor: not-allowed;
         }
         
@@ -195,7 +186,7 @@
         
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.08); }
         }
         
         .controls {
@@ -279,30 +270,67 @@
             margin-bottom: 15px;
         }
         
-        @media (max-width: 380px) {
+        /* 🔥 КРИТИЧНО: Адаптация под РАЗНЫЕ телефоны */
+        @media (max-width: 375px) {
             .game-board {
-                max-width: 360px;
-                height: 520px;
+                max-width: 350px;
+                height: 540px;
+                padding: 10px;
+            }
+            .tile {
+                width: 42px;
+                height: 56px;
+            }
+            .tile-symbol {
+                font-size: 40px;
             }
         }
         
         @media (max-width: 350px) {
             .game-board {
-                max-width: 330px;
+                max-width: 320px;
                 height: 500px;
+                padding: 8px;
             }
             .tile {
-                width: 38px;
-                height: 52px;
+                width: 40px;
+                height: 54px;
             }
             .tile-symbol {
-                font-size: 34px;
+                font-size: 38px;
             }
         }
         
-        @media (min-height: 800px) {
+        @media (min-width: 400px) {
             .game-board {
-                height: 600px;
+                max-width: 420px;
+                height: 580px;
+            }
+            .tile {
+                width: 46px;
+                height: 60px;
+            }
+            .tile-symbol {
+                font-size: 44px;
+            }
+        }
+        
+        @media (min-height: 850px) {
+            .game-board {
+                height: 620px;
+            }
+        }
+        
+        /* Для экранов с высоким DPI (Retina) */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .tile-symbol {
+                font-size: 44px;
+                text-shadow: 
+                    -1px -1px 0 #000,
+                    1px -1px 0 #000,
+                    -1px 1px 0 #000,
+                    1px 1px 0 #000,
+                    0 0 15px rgba(0,0,0,0.6);
             }
         }
     </style>
@@ -400,10 +428,10 @@
         var timerInterval = null;
         var totalPairs = 0;
         
-        var tileWidth = 42;
-        var tileHeight = 56;
-        var tileStepX = 44;
-        var tileStepY = 58;
+        var tileWidth = 44;
+        var tileHeight = 58;
+        var tileStepX = 46;
+        var tileStepY = 60;
         var padding = 12;
 
         function getTilePositions() {
@@ -517,7 +545,6 @@
                 element.style.top = tile.y + 'px';
                 element.style.zIndex = tile.z + 1;
                 
-                // Создаём отдельный элемент для символа
                 var symbolEl = document.createElement('span');
                 symbolEl.className = 'tile-symbol';
                 symbolEl.textContent = tile.symbol;
