@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260">
+<rect x="0" y="0" width="200" height="260" rx="22" fill="#fbf7ee"/>
+<rect x="8" y="8" width="184" height="244" rx="18" fill="#fffdf8" stroke="#e7dcc8" stroke-width="4"/>
+
+    <g opacity="0.16">
+      <text x="24" y="38" font-size="22" fill="#111" font-family="Arial" font-weight="700">CHARACTER</text>
+    </g>
+    <rect x="42" y="48" width="116" height="164" rx="16" fill="#fffefb" stroke="#1e1e1e" stroke-width="6"/>
+    <text x="100" y="150" text-anchor="middle" font-size="102" fill="#111" font-family="Arial Black, Arial, sans-serif" font-weight="900">9</text>
+    <text x="100" y="198" text-anchor="middle" font-size="30" fill="#cc1f1f" font-family="Arial Black, Arial, sans-serif" font-weight="800">WAN</text>
+    
+</svg>
