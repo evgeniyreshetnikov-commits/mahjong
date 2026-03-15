@@ -815,6 +815,21 @@
         return extendLayoutDown(positions);
       }
 
+      function chooseRandomLayout() {
+        var keys = Object.keys(layouts);
+        var available = keys.slice();
+
+        if (previousLayoutKey && available.length > 1) {
+          available = available.filter(function (key) {
+            return key !== previousLayoutKey;
+          });
+        }
+
+        currentLayoutKey = available[Math.floor(Math.random() * available.length)];
+        previousLayoutKey = currentLayoutKey;
+        layoutBadgeEl.textContent = "Раскладка: " + layouts[currentLayoutKey].name;
+      }
+
       function calculateLayoutBounds() {
         var positions = getLayoutPositions();
         var maxRight = 0;
@@ -873,8 +888,13 @@
       }
 
       function createTilesFromSymbols(symbolPool) {
-        var positions = getLayoutPositions();
-        var numPairs = Math.floor(positions.length / 2);
+        var positions = getLayoutPositions().slice();
+
+        if (positions.length % 2 !== 0) {
+          positions.pop();
+        }
+
+        var numPairs = positions.length / 2;
         var selectedSymbols = [];
         var i;
 
@@ -1071,7 +1091,7 @@
           }
         }
 
-        tiles = bestTiles;
+        tiles = bestTiles || [];
         totalPairs = Math.floor(tiles.length / 2);
       }
 
@@ -1433,6 +1453,12 @@
         calculateLayoutBounds();
         updateBoardMetrics();
         chooseBestInitialLayout();
+
+        if (!tiles.length) {
+          console.error("Не удалось создать плитки");
+          return;
+        }
+
         renderTiles();
         ensurePlayableBoard();
         renderTiles();
