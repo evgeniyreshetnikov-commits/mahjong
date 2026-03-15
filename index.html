@@ -81,8 +81,16 @@
       letter-spacing: 0.4px;
     }
 
-    .layout-badge {
+    .top-badges {
       margin-top: 6px;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .layout-badge,
+    .difficulty-badge {
       display: inline-block;
       padding: 6px 12px;
       border-radius: 999px;
@@ -127,6 +135,33 @@
       font-size: 20px;
       font-weight: 900;
       color: var(--title-color);
+    }
+
+    .difficulty-switcher {
+      width: 100%;
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .difficulty-btn {
+      flex: 1;
+      border: 2px solid rgba(255, 215, 0, 0.55);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 8px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .difficulty-btn.active {
+      background: linear-gradient(145deg, #ffd700 0%, #ffaa00 100%);
+      color: #1a472a;
+      border-color: #ffcc00;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
     }
 
     .game-board {
@@ -333,6 +368,11 @@
         font-size: 12px;
         padding: 13px 8px;
       }
+
+      .difficulty-btn {
+        font-size: 11px;
+        padding: 9px 6px;
+      }
     }
 
     @media (max-width: 350px) {
@@ -351,6 +391,10 @@
       .btn {
         font-size: 11px;
       }
+
+      .difficulty-btn {
+        font-size: 10px;
+      }
     }
   </style>
 </head>
@@ -358,7 +402,10 @@
   <div class="app">
     <div class="game-header">
       <h1 class="title">🀄 Маджонг</h1>
-      <div class="layout-badge" id="layoutBadge">Раскладка: Пирамида</div>
+      <div class="top-badges">
+        <div class="layout-badge" id="layoutBadge">Раскладка: Пирамида</div>
+        <div class="difficulty-badge" id="difficultyBadge">Сложность: Средняя</div>
+      </div>
     </div>
 
     <div class="stats">
@@ -374,6 +421,12 @@
         <div class="stat-label">Время</div>
         <div class="stat-value" id="timer">00:00</div>
       </div>
+    </div>
+
+    <div class="difficulty-switcher">
+      <button class="difficulty-btn" id="easyBtn" type="button">Спокойная</button>
+      <button class="difficulty-btn active" id="mediumBtn" type="button">Средняя</button>
+      <button class="difficulty-btn" id="hardBtn" type="button">Хард</button>
     </div>
 
     <div class="game-board" id="board">
@@ -445,6 +498,7 @@
       var finalScoreEl = document.getElementById("finalScore");
       var finalTimeEl = document.getElementById("finalTime");
       var layoutBadgeEl = document.getElementById("layoutBadge");
+      var difficultyBadgeEl = document.getElementById("difficultyBadge");
 
       var BASE_TILE_W = 54;
       var BASE_TILE_H = 72;
@@ -473,6 +527,43 @@
 
       var currentLayoutKey = null;
       var previousLayoutKey = null;
+      var currentDifficulty = "medium";
+
+      var difficultyProfiles = {
+        easy: {
+          name: "Спокойная",
+          initialPairsTarget: 5,
+          qualityTarget: 260,
+          shuffleTargetBig: 5,
+          shuffleTargetSmall: 4,
+          assistMinPairs: 4,
+          initialAttempts: 40,
+          shuffleAttempts: 60,
+          assistAttempts: 40
+        },
+        medium: {
+          name: "Средняя",
+          initialPairsTarget: 4,
+          qualityTarget: 220,
+          shuffleTargetBig: 4,
+          shuffleTargetSmall: 3,
+          assistMinPairs: 3,
+          initialAttempts: 30,
+          shuffleAttempts: 50,
+          assistAttempts: 30
+        },
+        hard: {
+          name: "Хард",
+          initialPairsTarget: 3,
+          qualityTarget: 170,
+          shuffleTargetBig: 3,
+          shuffleTargetSmall: 2,
+          assistMinPairs: 2,
+          initialAttempts: 18,
+          shuffleAttempts: 25,
+          assistAttempts: 16
+        }
+      };
 
       var tileSymbols = [
         { key: "wind-east", type: "wind", src: "assets/tiles/wind-east.svg" },
@@ -519,6 +610,25 @@
         fortress: { name: "Крепость", build: buildFortressLayout },
         crown: { name: "Корона", build: buildCrownLayout }
       };
+
+      function getDifficultyProfile() {
+        return difficultyProfiles[currentDifficulty];
+      }
+
+      function updateDifficultyUI() {
+        difficultyBadgeEl.textContent = "Сложность: " + getDifficultyProfile().name;
+
+        document.getElementById("easyBtn").classList.toggle("active", currentDifficulty === "easy");
+        document.getElementById("mediumBtn").classList.toggle("active", currentDifficulty === "medium");
+        document.getElementById("hardBtn").classList.toggle("active", currentDifficulty === "hard");
+      }
+
+      function setDifficulty(level) {
+        if (!difficultyProfiles[level]) return;
+        currentDifficulty = level;
+        updateDifficultyUI();
+        resetGame();
+      }
 
       function impact(type) {
         if (hasTelegram && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
@@ -714,14 +824,15 @@
       function updateBoardMetrics() {
         var appWidth = Math.min(window.innerWidth - 16, 460);
         var statsApprox = 74;
-        var headerApprox = 58;
+        var headerApprox = 88;
+        var difficultyApprox = 48;
         var controlsApprox = 58;
         var hintsApprox = 22;
         var extraSpacing = 56;
-        var availableHeight = window.innerHeight - statsApprox - headerApprox - controlsApprox - hintsApprox - extraSpacing;
+        var availableHeight = window.innerHeight - statsApprox - headerApprox - difficultyApprox - controlsApprox - hintsApprox - extraSpacing;
 
-        if (availableHeight < 420) {
-          availableHeight = 420;
+        if (availableHeight < 400) {
+          availableHeight = 400;
         }
 
         calculateLayoutBounds();
@@ -923,7 +1034,8 @@
       function chooseBestInitialLayout() {
         var bestTiles = null;
         var bestScore = -1;
-        var attempts = 30;
+        var profile = getDifficultyProfile();
+        var attempts = profile.initialAttempts;
         var i;
 
         for (i = 0; i < attempts; i++) {
@@ -932,8 +1044,8 @@
           var quality = simulateQualityScore(candidate, 18);
           var scoreValue = pairsCount * 50 + quality;
 
-          if (pairsCount >= 4) scoreValue += 120;
-          if (pairsCount >= 5) scoreValue += 80;
+          if (pairsCount >= profile.initialPairsTarget) scoreValue += 140;
+          if (quality >= profile.qualityTarget) scoreValue += 100;
 
           if (scoreValue > bestScore) {
             bestScore = scoreValue;
@@ -1224,19 +1336,23 @@
       }
 
       function maybeAssistBoard() {
+        var profile = getDifficultyProfile();
         var remaining = getRemainingTiles().length;
+
         if (remaining < 8) return;
 
         var availablePairs = countAvailablePairs();
-        if (availablePairs >= 3) return;
+        if (availablePairs >= profile.assistMinPairs) return;
 
         clearSelection();
-        trySmartShuffle(3, 30);
+        trySmartShuffle(profile.assistMinPairs, profile.assistAttempts);
         applySymbolsToTiles(getRemainingTiles());
         updateBlockedStatus();
       }
 
       function shuffleTiles() {
+        var profile = getDifficultyProfile();
+
         clearSelection();
 
         var remaining = getRemainingTiles();
@@ -1245,11 +1361,11 @@
           return;
         }
 
-        var targetPairs = remaining.length > 24 ? 4 : 3;
-        var success = trySmartShuffle(targetPairs, 50);
+        var targetPairs = remaining.length > 24 ? profile.shuffleTargetBig : profile.shuffleTargetSmall;
+        var success = trySmartShuffle(targetPairs, profile.shuffleAttempts);
 
         if (!success) {
-          success = trySmartShuffle(2, 50);
+          success = trySmartShuffle(Math.max(1, targetPairs - 1), profile.shuffleAttempts);
         }
 
         applySymbolsToTiles(remaining);
@@ -1258,15 +1374,16 @@
       }
 
       function ensurePlayableBoard() {
+        var profile = getDifficultyProfile();
         var attempts = 0;
 
         while (attempts < 10) {
           var pairsCount = countAvailablePairs();
           var quality = simulateQualityScore(tiles, 16);
 
-          if (pairsCount >= 4 && quality >= 220) return;
+          if (pairsCount >= profile.initialPairsTarget && quality >= profile.qualityTarget) return;
 
-          trySmartShuffle(4, 30);
+          trySmartShuffle(profile.shuffleTargetBig, profile.shuffleAttempts);
           attempts += 1;
         }
       }
@@ -1305,11 +1422,60 @@
         startTimer();
       }
 
+      function chooseRandomLayout() {
+        var keys = Object.keys(layouts);
+        var available = keys.slice();
+
+        if (previousLayoutKey && available.length > 1) {
+          available = available.filter(function (key) {
+            return key !== previousLayoutKey;
+          });
+        }
+
+        currentLayoutKey = available[Math.floor(Math.random() * available.length)];
+        previousLayoutKey = currentLayoutKey;
+        layoutBadgeEl.textContent = "Раскладка: " + layouts[currentLayoutKey].name;
+      }
+
+      function calculateLayoutBounds() {
+        var positions = getLayoutPositions();
+        var maxRight = 0;
+        var maxBottom = 0;
+        var minLeft = Infinity;
+        var minTop = Infinity;
+        var i;
+        var p;
+
+        for (i = 0; i < positions.length; i++) {
+          p = positions[i];
+          if (p.x < minLeft) minLeft = p.x;
+          if (p.y < minTop) minTop = p.y;
+          if (p.x + tileWidth > maxRight) maxRight = p.x + tileWidth;
+          if (p.y + tileHeight > maxBottom) maxBottom = p.y + tileHeight;
+        }
+
+        if (!isFinite(minLeft)) minLeft = 0;
+        if (!isFinite(minTop)) minTop = 0;
+
+        layoutWidth = Math.ceil(maxRight - minLeft + padding);
+        layoutHeight = Math.ceil(maxBottom - minTop + padding);
+      }
+
       document.getElementById("shuffleBtn").addEventListener("click", shuffleTiles);
       document.getElementById("resetBtn").addEventListener("click", resetGame);
       document.getElementById("hintBtn").addEventListener("click", showHint);
       document.getElementById("playAgainBtn").addEventListener("click", resetGame);
       document.getElementById("modalShuffleBtn").addEventListener("click", shuffleTiles);
+
+      document.getElementById("easyBtn").addEventListener("click", function () {
+        setDifficulty("easy");
+      });
+      document.getElementById("mediumBtn").addEventListener("click", function () {
+        setDifficulty("medium");
+      });
+      document.getElementById("hardBtn").addEventListener("click", function () {
+        setDifficulty("hard");
+      });
 
       window.addEventListener("resize", function () {
         if (tiles.length > 0 && currentLayoutKey) {
@@ -1326,6 +1492,7 @@
       }
 
       currentLayoutKey = "pyramid";
+      updateDifficultyUI();
       updateBoardMetrics();
       resetGame();
     })();
