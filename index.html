@@ -79,7 +79,6 @@
             font-weight: 700;
         }
         
-        /* Поле БОЛЬШЕ для 6 ярусов */
         .game-board {
             position: relative;
             background: #2d5a3f;
@@ -93,7 +92,6 @@
             overflow: hidden;
         }
         
-        /* Плитка 42×56px - НЕ уменьшаем */
         .tile {
             position: absolute;
             width: 42px;
@@ -144,6 +142,11 @@
             opacity: 0;
             transform: scale(0.8);
             transition: all 0.3s;
+        }
+        
+        .tile.hint {
+            box-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00 !important;
+            z-index: 101;
         }
         
         .controls {
@@ -346,21 +349,15 @@
         var timerInterval = null;
         var totalPairs = 0;
         
-        // Размеры - плитки НЕ уменьшаем
         var tileWidth = 42;
         var tileHeight = 56;
-        var tileStepX = 44;  // 42px + 2px зазор
-        var tileStepY = 58;  // 56px + 2px зазор
+        var tileStepX = 44;
+        var tileStepY = 58;
         var padding = 12;
-        
-        // Поле 400px - padding 24px = 376px рабочей области
-        // 7 плиток × 44px = 308px + отступы = влезает ✓
 
-        // 6 ЯРУСОВ для 100+ плиток при 7 колонках
         function getTilePositions() {
             var positions = [];
             
-            // ЯРУС 0 (база) - 7×6 = 42 плитки
             for (var row = 0; row < 6; row++) {
                 for (var col = 0; col < 7; col++) {
                     positions.push({
@@ -371,7 +368,6 @@
                 }
             }
             
-            // ЯРУС 1 - 6×5 = 30 плиток
             for (var row = 0; row < 5; row++) {
                 for (var col = 0; col < 6; col++) {
                     positions.push({
@@ -382,7 +378,6 @@
                 }
             }
             
-            // ЯРУС 2 - 5×4 = 20 плиток
             for (var row = 0; row < 4; row++) {
                 for (var col = 0; col < 5; col++) {
                     positions.push({
@@ -393,7 +388,6 @@
                 }
             }
             
-            // ЯРУС 3 - 4×3 = 12 плиток
             for (var row = 0; row < 3; row++) {
                 for (var col = 0; col < 4; col++) {
                     positions.push({
@@ -404,7 +398,6 @@
                 }
             }
             
-            // ЯРУС 4 - 3×2 = 6 плиток
             for (var row = 0; row < 2; row++) {
                 for (var col = 0; col < 3; col++) {
                     positions.push({
@@ -415,7 +408,6 @@
                 }
             }
             
-            // ЯРУС 5 (пик) - 2×1 = 2 плитки
             positions.push({ x: padding + 3.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
             positions.push({ x: padding + 4.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
             
@@ -642,6 +634,35 @@
 
         function showNoMovesModal() {
             document.getElementById('noMovesModal').classList.add('show');
+        }
+
+        // ✅ ДОБАВЛЕНА ФУНКЦИЯ ПОДСКАЗКИ
+        function showHint() {
+            var freeTiles = tiles.filter(function(t) {
+                return !t.removed && isTileFree(t);
+            });
+            
+            for (var i = 0; i < freeTiles.length; i++) {
+                for (var j = i + 1; j < freeTiles.length; j++) {
+                    if (freeTiles[i].symbol === freeTiles[j].symbol) {
+                        freeTiles[i].element.classList.add('hint');
+                        freeTiles[j].element.classList.add('hint');
+                        
+                        if (tg.HapticFeedback) {
+                            tg.HapticFeedback.impactOccurred('light');
+                        }
+                        
+                        setTimeout(function() {
+                            freeTiles[i].element.classList.remove('hint');
+                            freeTiles[j].element.classList.remove('hint');
+                        }, 2000);
+                        
+                        return;
+                    }
+                }
+            }
+            
+            showNoMovesModal();
         }
 
         function shuffleTiles() {
