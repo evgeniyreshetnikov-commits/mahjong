@@ -92,45 +92,88 @@
             overflow: hidden;
         }
         
+        /* Плитка - светлая для контраста */
         .tile {
             position: absolute;
             width: 42px;
             height: 56px;
-            background: linear-gradient(145deg, #f8f4e6 0%, #e8dcc8 100%);
+            background: linear-gradient(145deg, #fffef0 0%, #f0e6d2 100%);
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
             cursor: pointer;
             box-shadow: 
                 2px 2px 4px rgba(0,0,0,0.5),
                 3px 3px 6px rgba(0,0,0,0.4);
-            border: 1px solid #c9b896;
+            border: 2px solid #c9b896;
             z-index: 1;
         }
         
-        .tile[data-type="bamboo"], .tile[data-type="character"] {
-            color: #006400;
+        /* Символ на ВСЮ плитку - крупный и контрастный */
+        .tile-symbol {
+            font-size: 38px;
+            font-weight: bold;
+            line-height: 1;
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.8));
+            /* Увеличиваем контрастность */
+            -webkit-filter: contrast(1.2);
+            filter: contrast(1.2);
         }
         
-        .tile[data-type="circle"], .tile[data-type="dragon"] {
+        /* Цвета символов - МАКСИМАЛЬНЫЙ КОНТРАСТ */
+        .tile[data-type="bamboo"] .tile-symbol {
+            color: #004d00;
+            text-shadow: 
+                0 0 3px #000,
+                0 0 5px #000;
+        }
+        
+        .tile[data-type="character"] .tile-symbol {
+            color: #004d00;
+            text-shadow: 
+                0 0 3px #000,
+                0 0 5px #000;
+        }
+        
+        .tile[data-type="circle"] .tile-symbol {
             color: #cc0000;
+            text-shadow: 
+                0 0 3px #000,
+                0 0 5px #000;
         }
         
-        .tile[data-type="wind"], .tile[data-type="flower"] {
-            color: #000080;
+        .tile[data-type="dragon"] .tile-symbol {
+            color: #cc0000;
+            text-shadow: 
+                0 0 3px #000,
+                0 0 5px #000;
+        }
+        
+        .tile[data-type="wind"] .tile-symbol {
+            color: #000066;
+            text-shadow: 
+                0 0 3px #000,
+                0 0 5px #000;
+        }
+        
+        .tile[data-type="flower"] .tile-symbol {
+            color: #000066;
+            text-shadow: 
+                0 0 3px #000,
+                0 0 5px #000;
         }
         
         .tile.selected {
             background: #ffd700;
-            box-shadow: 0 0 15px #ffd700, 2px 2px 4px rgba(0,0,0,0.5);
+            box-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700, 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 100;
-            transform: scale(1.08);
+            transform: scale(1.1);
+            border: 3px solid #ff8800;
         }
         
         .tile.blocked {
-            filter: brightness(0.5);
+            filter: brightness(0.4);
             cursor: not-allowed;
         }
         
@@ -145,8 +188,14 @@
         }
         
         .tile.hint {
-            box-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00 !important;
+            box-shadow: 0 0 25px #00ff00, 0 0 50px #00ff00 !important;
             z-index: 101;
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
         
         .controls {
@@ -162,8 +211,8 @@
         }
         
         .btn {
-            padding: 10px 14px;
-            font-size: 11px;
+            padding: 12px 16px;
+            font-size: 13px;
             font-weight: bold;
             border: none;
             border-radius: 8px;
@@ -186,9 +235,9 @@
         .hints {
             margin-top: 6px;
             color: #fff;
-            font-size: 10px;
+            font-size: 11px;
             text-align: center;
-            opacity: 0.7;
+            opacity: 0.8;
         }
         
         .modal {
@@ -197,7 +246,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.9);
             display: none;
             align-items: center;
             justify-content: center;
@@ -218,14 +267,14 @@
         }
         
         .modal-title {
-            font-size: 24px;
+            font-size: 26px;
             color: #ffd700;
             margin-bottom: 12px;
             font-weight: bold;
         }
         
         .modal-text {
-            font-size: 15px;
+            font-size: 16px;
             color: #fff;
             margin-bottom: 15px;
         }
@@ -245,7 +294,9 @@
             .tile {
                 width: 38px;
                 height: 52px;
-                font-size: 26px;
+            }
+            .tile-symbol {
+                font-size: 34px;
             }
         }
         
@@ -459,14 +510,18 @@
                 
                 var element = document.createElement('div');
                 element.className = 'tile';
-                element.textContent = tile.symbol;
                 element.setAttribute('data-type', tile.type);
                 element.style.width = tileWidth + 'px';
                 element.style.height = tileHeight + 'px';
-                element.style.fontSize = (tileWidth * 0.65) + 'px';
                 element.style.left = tile.x + 'px';
                 element.style.top = tile.y + 'px';
                 element.style.zIndex = tile.z + 1;
+                
+                // Создаём отдельный элемент для символа
+                var symbolEl = document.createElement('span');
+                symbolEl.className = 'tile-symbol';
+                symbolEl.textContent = tile.symbol;
+                element.appendChild(symbolEl);
                 
                 element.addEventListener('click', function() {
                     onTileClick(tile);
@@ -636,7 +691,6 @@
             document.getElementById('noMovesModal').classList.add('show');
         }
 
-        // ✅ ДОБАВЛЕНА ФУНКЦИЯ ПОДСКАЗКИ
         function showHint() {
             var freeTiles = tiles.filter(function(t) {
                 return !t.removed && isTileFree(t);
@@ -684,7 +738,7 @@
                 tile.symbol = symbols[index].symbol;
                 tile.type = symbols[index].type;
                 if (tile.element) {
-                    tile.element.textContent = tile.symbol;
+                    tile.element.querySelector('.tile-symbol').textContent = tile.symbol;
                     tile.element.setAttribute('data-type', tile.type);
                 }
             });
