@@ -2,140 +2,342 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <title>🀄 Маджонг</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg-top: #dfece0;
-      --bg-bottom: #cadcc9;
-      --panel-bg: rgba(255,255,255,0.34);
-      --panel-border: #f3c900;
-      --title-color: #f3c900;
-      --board-border: #a35a16;
-      --board-fill-1: #2e6848;
-      --board-fill-2: #24563a;
-      --tile-border: #d7ccb8;
-      --tile-edge: #f3ebdd;
-      --tile-shadow: rgba(0,0,0,0.30);
-      --tile-shadow-2: rgba(0,0,0,0.18);
-      --btn-brown-1: #9d5a1c;
-      --btn-brown-2: #7c4513;
-      --btn-gold-1: #ffd400;
-      --btn-gold-2: #efb400;
-      --hint: #00ff66;
-      --selected: #ff8f00;
+      --bg-top: #1a472a;
+      --bg-bottom: #2d5a3f;
+      --panel-bg: rgba(255, 255, 255, 0.18);
+      --panel-border: #ffd700;
+      --title-color: #ffd700;
+      --text-light: #ffffff;
+      --text-dark: #1a472a;
+      --board-border: #8b4513;
+      --tile-border: #d4c4a8;
+      --tile-front-1: #fffef8;
+      --tile-front-2: #f5ebd8;
+      --selected-1: #ffd700;
+      --selected-2: #ffaa00;
+      --selected-border: #ff6600;
+      --hint-color: #00ff66;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
-    html, body { width: 100%; min-height: 100%; overflow-x: hidden; font-family: Arial, Helvetica, sans-serif; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      overflow-x: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
     body {
       background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
-      display: flex; justify-content: center;
-      padding: calc(env(safe-area-inset-top, 0px) + 8px) 8px calc(env(safe-area-inset-bottom, 0px) + 14px);
-      color: #fff;
-    }
-    .app { width: min(100%, 460px); display: flex; flex-direction: column; align-items: center; }
-    .game-header { width: 100%; text-align: center; margin-bottom: 8px; }
-    .title {
-      font-size: 28px; font-weight: 900; color: var(--title-color); line-height: 1.1;
-      text-shadow: 0 3px 8px rgba(0,0,0,0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding:
+        calc(env(safe-area-inset-top, 0px) + 8px)
+        8px
+        calc(env(safe-area-inset-bottom, 0px) + 14px);
+      color: var(--text-light);
     }
 
-    .stats { width: 100%; display: flex; gap: 8px; margin-bottom: 12px; }
-    .stat-box {
-      flex: 1; min-width: 0; background: var(--panel-bg); border: 3px solid var(--panel-border); border-radius: 14px;
-      padding: 10px 6px; text-align: center; box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    .app {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .stat-label { font-size: 11px; text-transform: uppercase; font-weight: 800; color: rgba(255,255,255,0.78); margin-bottom: 5px; }
-    .stat-value { font-size: 20px; font-weight: 900; color: var(--title-color); }
+
+    .game-header {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .title {
+      font-size: 28px;
+      line-height: 1.1;
+      font-weight: 900;
+      color: var(--title-color);
+      text-shadow: 0 3px 8px rgba(0, 0, 0, 0.65);
+      letter-spacing: 0.4px;
+    }
+
+    .stats {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .stat-box {
+      flex: 1;
+      min-width: 0;
+      max-width: 120px;
+      padding: 10px 8px;
+      text-align: center;
+      border-radius: 12px;
+      background: var(--panel-bg);
+      border: 3px solid var(--panel-border);
+      backdrop-filter: blur(3px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.88);
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--title-color);
+    }
 
     .game-board {
-      width: 100%; position: relative; border-radius: 16px; border: 4px solid var(--board-border);
+      position: relative;
+      width: 100%;
+      border-radius: 14px;
+      border: 4px solid var(--board-border);
       background:
-        radial-gradient(circle at top left, rgba(255,255,255,0.08), transparent 30%),
-        linear-gradient(180deg, var(--board-fill-1) 0%, var(--board-fill-2) 100%);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.14);
+        radial-gradient(circle at top left, rgba(255,255,255,0.08), transparent 28%),
+        linear-gradient(180deg, #2f6547 0%, #27543b 100%);
+      box-shadow:
+        0 12px 34px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .board-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
     }
-    .board-inner { position: relative; transform-origin: top left; }
 
     .tile {
       position: absolute;
-      border-radius: 13px;
+      border-radius: 11px;
       border: 3px solid var(--tile-border);
-      background: linear-gradient(145deg, #fffdf8 0%, var(--tile-edge) 100%);
+      background: linear-gradient(145deg, var(--tile-front-1) 0%, var(--tile-front-2) 100%);
       box-shadow:
-        0 3px 8px var(--tile-shadow),
-        0 8px 18px var(--tile-shadow-2),
-        inset 0 2px 4px rgba(255,255,255,0.95);
+        0 3px 6px rgba(0, 0, 0, 0.42),
+        0 7px 14px rgba(0, 0, 0, 0.28),
+        inset 0 2px 4px rgba(255,255,255,0.92);
       overflow: hidden;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease, opacity 0.25s ease;
       cursor: pointer;
+      transition:
+        transform 0.15s ease,
+        filter 0.15s ease,
+        box-shadow 0.15s ease,
+        opacity 0.25s ease;
+      transform-origin: center center;
     }
-    .tile::after {
+
+    .tile::before {
       content: "";
-      position: absolute; inset: 0; border-radius: 10px; pointer-events: none;
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      pointer-events: none;
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55);
     }
-    .tile-art {
-      width: 100%; height: 100%; display: block; object-fit: cover; pointer-events: none;
-      image-rendering: -webkit-optimize-contrast;
-      image-rendering: crisp-edges;
-    }
-    .tile.blocked { filter: brightness(0.48) saturate(0.82); cursor: not-allowed; }
-    .tile.free { filter: brightness(1); }
-    .tile.selected {
-      border: 4px solid var(--selected);
-      box-shadow:
-        0 0 18px rgba(255, 171, 0, 0.9),
-        0 0 28px rgba(255, 171, 0, 0.45),
-        0 8px 18px rgba(0,0,0,0.22);
-      transform: scale(1.05);
-      z-index: 999 !important;
-    }
-    .tile.hint {
-      border: 4px solid var(--hint);
-      box-shadow:
-        0 0 18px rgba(0,255,102,0.92),
-        0 0 26px rgba(0,255,102,0.5),
-        0 8px 18px rgba(0,0,0,0.22);
-      animation: hintPulse 0.75s ease-in-out infinite;
-      z-index: 999 !important;
-    }
-    .tile.matched { opacity: 0; transform: scale(0.6); pointer-events: none; }
-    @keyframes hintPulse { 0%,100%{ transform: scale(1.03);} 50%{ transform: scale(1.08);} }
 
-    .controls { width: 100%; display: flex; gap: 8px; margin-top: 12px; }
-    .btn {
-      flex: 1; min-width: 0; border: none; border-radius: 14px; padding: 15px 8px;
-      font-size: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+    .tile-face {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
     }
-    .btn-primary { background: linear-gradient(145deg, var(--btn-gold-1) 0%, var(--btn-gold-2) 100%); color: #244733; }
-    .btn-secondary { background: linear-gradient(145deg, var(--btn-brown-1) 0%, var(--btn-brown-2) 100%); color: #fff; }
-    .hints { margin-top: 10px; text-align: center; font-size: 12px; color: rgba(255,255,255,0.82); }
+
+    .tile-image {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .tile.free {
+      filter: brightness(1);
+    }
+
+    .tile.blocked {
+      filter: brightness(0.48) saturate(0.82);
+      cursor: not-allowed;
+    }
+
+    .tile.selected {
+      background: linear-gradient(145deg, var(--selected-1) 0%, var(--selected-2) 100%);
+      border: 4px solid var(--selected-border);
+      box-shadow:
+        0 0 18px rgba(255, 215, 0, 0.9),
+        0 0 32px rgba(255, 170, 0, 0.65),
+        0 8px 14px rgba(0, 0, 0, 0.32);
+      transform: scale(1.06);
+    }
+
+    .tile.hint {
+      border: 4px solid var(--hint-color);
+      box-shadow:
+        0 0 16px rgba(0, 255, 102, 0.95),
+        0 0 30px rgba(0, 255, 102, 0.55),
+        0 8px 14px rgba(0, 0, 0, 0.28);
+      animation: hintPulse 0.7s ease-in-out infinite;
+    }
+
+    .tile.matched {
+      opacity: 0;
+      transform: scale(0.6);
+      pointer-events: none;
+    }
+
+    @keyframes hintPulse {
+      0%, 100% { transform: scale(1.03); }
+      50% { transform: scale(1.08); }
+    }
+
+    .controls {
+      width: 100%;
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 0;
+      padding: 14px 10px;
+      border: none;
+      border-radius: 11px;
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(145deg, #ffd700 0%, #ffaa00 100%);
+      color: var(--text-dark);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(145deg, #8b4513 0%, #654321 100%);
+      color: #fff;
+    }
+
+    .hints {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.92;
+      color: rgba(255, 255, 255, 0.95);
+    }
 
     .modal {
-      position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.88); padding: 16px; z-index: 3000;
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 2000;
     }
-    .modal.show { display: flex; }
+
+    .modal.show {
+      display: flex;
+    }
+
     .modal-content {
-      width: 100%; max-width: 360px; border-radius: 18px; border: 4px solid var(--panel-border);
-      padding: 28px 22px; text-align: center;
+      width: 100%;
+      max-width: 360px;
+      padding: 28px 22px;
+      text-align: center;
+      border-radius: 16px;
+      border: 4px solid #ffd700;
       background: linear-gradient(145deg, #1a472a 0%, #2d5a3f 100%);
-      box-shadow: 0 18px 36px rgba(0,0,0,0.4);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
     }
-    .modal-title { font-size: 30px; color: var(--panel-border); font-weight: 900; margin-bottom: 14px; }
-    .modal-text { font-size: 18px; color: #fff; margin-bottom: 14px; }
+
+    .modal-title {
+      margin-bottom: 14px;
+      font-size: 30px;
+      font-weight: 900;
+      color: #ffd700;
+    }
+
+    .modal-text {
+      margin-bottom: 14px;
+      font-size: 18px;
+      color: #fff;
+    }
 
     @media (max-width: 390px) {
-      .title { font-size: 26px; }
-      .stat-value { font-size: 18px; }
-      .btn { font-size: 11px; padding: 14px 6px; }
+      .title {
+        font-size: 26px;
+      }
+
+      .stat-box {
+        padding: 10px 6px;
+      }
+
+      .stat-value {
+        font-size: 18px;
+      }
+
+      .btn {
+        font-size: 12px;
+        padding: 13px 8px;
+      }
+    }
+
+    @media (max-width: 350px) {
+      .stats {
+        gap: 6px;
+      }
+
+      .stat-label {
+        font-size: 10px;
+      }
+
+      .stat-value {
+        font-size: 17px;
+      }
+
+      .btn {
+        font-size: 11px;
+      }
     }
   </style>
 </head>
@@ -204,13 +406,18 @@
       if (hasTelegram) {
         tg.ready();
         tg.expand();
-        if (tg.colorScheme === "dark") {
-          document.documentElement.style.setProperty("--bg-top", "#264332");
-          document.documentElement.style.setProperty("--bg-bottom", "#1c3024");
-          document.documentElement.style.setProperty("--panel-bg", "rgba(255,255,255,0.14)");
+
+        if (tg.colorScheme === "light") {
+          document.documentElement.style.setProperty("--bg-top", "#dfece0");
+          document.documentElement.style.setProperty("--bg-bottom", "#cadcc9");
+          document.documentElement.style.setProperty("--panel-bg", "rgba(255,255,255,0.34)");
         }
+
         tg.MainButton.setText("🎮 ИГРАТЬ СНОВА");
-        tg.MainButton.setParams({ color: "#2d5a3f", text_color: "#ffd700" });
+        tg.MainButton.setParams({
+          color: "#2d5a3f",
+          text_color: "#ffd700"
+        });
         tg.MainButton.hide();
       }
 
@@ -249,41 +456,41 @@
       var timerInterval = null;
       var gameSessionId = 0;
 
-      var tileCatalog = [
-        { key: "wind-east", type: "wind" },
-        { key: "wind-south", type: "wind" },
-        { key: "wind-west", type: "wind" },
-        { key: "wind-north", type: "wind" },
-        { key: "dragon-red", type: "dragon" },
-        { key: "dragon-green", type: "dragon" },
-        { key: "dragon-white", type: "dragon" },
-        { key: "character-1", type: "character" },
-        { key: "character-2", type: "character" },
-        { key: "character-3", type: "character" },
-        { key: "character-4", type: "character" },
-        { key: "character-5", type: "character" },
-        { key: "character-6", type: "character" },
-        { key: "character-7", type: "character" },
-        { key: "character-8", type: "character" },
-        { key: "character-9", type: "character" },
-        { key: "bamboo-1", type: "bamboo" },
-        { key: "bamboo-2", type: "bamboo" },
-        { key: "bamboo-3", type: "bamboo" },
-        { key: "bamboo-4", type: "bamboo" },
-        { key: "bamboo-5", type: "bamboo" },
-        { key: "bamboo-6", type: "bamboo" },
-        { key: "bamboo-7", type: "bamboo" },
-        { key: "bamboo-8", type: "bamboo" },
-        { key: "bamboo-9", type: "bamboo" },
-        { key: "circle-1", type: "circle" },
-        { key: "circle-2", type: "circle" },
-        { key: "circle-3", type: "circle" },
-        { key: "circle-4", type: "circle" },
-        { key: "circle-5", type: "circle" },
-        { key: "circle-6", type: "circle" },
-        { key: "circle-7", type: "circle" },
-        { key: "circle-8", type: "circle" },
-        { key: "circle-9", type: "circle" }
+      var tileSymbols = [
+        { key: "wind-east", type: "wind", src: "assets/tiles/wind-east.svg" },
+        { key: "wind-south", type: "wind", src: "assets/tiles/wind-south.svg" },
+        { key: "wind-west", type: "wind", src: "assets/tiles/wind-west.svg" },
+        { key: "wind-north", type: "wind", src: "assets/tiles/wind-north.svg" },
+        { key: "dragon-red", type: "dragon", src: "assets/tiles/dragon-red.svg" },
+        { key: "dragon-green", type: "dragon", src: "assets/tiles/dragon-green.svg" },
+        { key: "dragon-white", type: "dragon", src: "assets/tiles/dragon-white.svg" },
+        { key: "character-1", type: "character", src: "assets/tiles/character-1.svg" },
+        { key: "character-2", type: "character", src: "assets/tiles/character-2.svg" },
+        { key: "character-3", type: "character", src: "assets/tiles/character-3.svg" },
+        { key: "character-4", type: "character", src: "assets/tiles/character-4.svg" },
+        { key: "character-5", type: "character", src: "assets/tiles/character-5.svg" },
+        { key: "character-6", type: "character", src: "assets/tiles/character-6.svg" },
+        { key: "character-7", type: "character", src: "assets/tiles/character-7.svg" },
+        { key: "character-8", type: "character", src: "assets/tiles/character-8.svg" },
+        { key: "character-9", type: "character", src: "assets/tiles/character-9.svg" },
+        { key: "bamboo-1", type: "bamboo", src: "assets/tiles/bamboo-1.svg" },
+        { key: "bamboo-2", type: "bamboo", src: "assets/tiles/bamboo-2.svg" },
+        { key: "bamboo-3", type: "bamboo", src: "assets/tiles/bamboo-3.svg" },
+        { key: "bamboo-4", type: "bamboo", src: "assets/tiles/bamboo-4.svg" },
+        { key: "bamboo-5", type: "bamboo", src: "assets/tiles/bamboo-5.svg" },
+        { key: "bamboo-6", type: "bamboo", src: "assets/tiles/bamboo-6.svg" },
+        { key: "bamboo-7", type: "bamboo", src: "assets/tiles/bamboo-7.svg" },
+        { key: "bamboo-8", type: "bamboo", src: "assets/tiles/bamboo-8.svg" },
+        { key: "bamboo-9", type: "bamboo", src: "assets/tiles/bamboo-9.svg" },
+        { key: "circle-1", type: "circle", src: "assets/tiles/circle-1.svg" },
+        { key: "circle-2", type: "circle", src: "assets/tiles/circle-2.svg" },
+        { key: "circle-3", type: "circle", src: "assets/tiles/circle-3.svg" },
+        { key: "circle-4", type: "circle", src: "assets/tiles/circle-4.svg" },
+        { key: "circle-5", type: "circle", src: "assets/tiles/circle-5.svg" },
+        { key: "circle-6", type: "circle", src: "assets/tiles/circle-6.svg" },
+        { key: "circle-7", type: "circle", src: "assets/tiles/circle-7.svg" },
+        { key: "circle-8", type: "circle", src: "assets/tiles/circle-8.svg" },
+        { key: "circle-9", type: "circle", src: "assets/tiles/circle-9.svg" }
       ];
 
       function impact(type) {
@@ -298,44 +505,81 @@
         }
       }
 
-      function getTileImagePath(tileKey) {
-        return "assets/tiles/" + tileKey + ".svg";
-      }
-
-      function getTileHTML(tileKey) {
-        return '<img class="tile-art" alt="" src="' + getTileImagePath(tileKey) + '" draggable="false">';
+      function getTileHTML(tile) {
+        return (
+          '<div class="tile-face">' +
+            '<img class="tile-image" src="' + tile.src + '" alt="" draggable="false" />' +
+          '</div>'
+        );
       }
 
       function shuffleArray(arr) {
         for (var i = arr.length - 1; i > 0; i--) {
           var j = Math.floor(Math.random() * (i + 1));
-          var temp = arr[i];
+          var tmp = arr[i];
           arr[i] = arr[j];
-          arr[j] = temp;
+          arr[j] = tmp;
         }
       }
 
       function getTilePositions() {
         var positions = [];
-        var row, col;
+        var row;
+        var col;
 
         for (row = 0; row < 6; row++) {
-          for (col = 0; col < 7; col++) positions.push({ x: padding + col * tileStepX, y: padding + row * tileStepY, z: 0 });
+          for (col = 0; col < 7; col++) {
+            positions.push({
+              x: padding + col * tileStepX,
+              y: padding + row * tileStepY,
+              z: 0
+            });
+          }
         }
+
         for (row = 0; row < 5; row++) {
-          for (col = 0; col < 6; col++) positions.push({ x: padding + tileStepX + col * tileStepX, y: padding + tileStepY / 2 + row * tileStepY, z: 1 });
+          for (col = 0; col < 6; col++) {
+            positions.push({
+              x: padding + tileStepX + col * tileStepX,
+              y: padding + tileStepY / 2 + row * tileStepY,
+              z: 1
+            });
+          }
         }
+
         for (row = 0; row < 4; row++) {
-          for (col = 0; col < 5; col++) positions.push({ x: padding + 2 * tileStepX + col * tileStepX, y: padding + tileStepY + row * tileStepY, z: 2 });
+          for (col = 0; col < 5; col++) {
+            positions.push({
+              x: padding + 2 * tileStepX + col * tileStepX,
+              y: padding + tileStepY + row * tileStepY,
+              z: 2
+            });
+          }
         }
+
         for (row = 0; row < 3; row++) {
-          for (col = 0; col < 4; col++) positions.push({ x: padding + 2.5 * tileStepX + col * tileStepX, y: padding + 1.5 * tileStepY + row * tileStepY, z: 3 });
+          for (col = 0; col < 4; col++) {
+            positions.push({
+              x: padding + 2.5 * tileStepX + col * tileStepX,
+              y: padding + 1.5 * tileStepY + row * tileStepY,
+              z: 3
+            });
+          }
         }
+
         for (row = 0; row < 2; row++) {
-          for (col = 0; col < 3; col++) positions.push({ x: padding + 3 * tileStepX + col * tileStepX, y: padding + 2 * tileStepY + row * tileStepY, z: 4 });
+          for (col = 0; col < 3; col++) {
+            positions.push({
+              x: padding + 3 * tileStepX + col * tileStepX,
+              y: padding + 2 * tileStepY + row * tileStepY,
+              z: 4
+            });
+          }
         }
+
         positions.push({ x: padding + 3.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
         positions.push({ x: padding + 4.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
+
         return positions;
       }
 
@@ -343,52 +587,72 @@
         var positions = getTilePositions();
         var maxRight = 0;
         var maxBottom = 0;
+
         for (var i = 0; i < positions.length; i++) {
           var p = positions[i];
           if (p.x + tileWidth > maxRight) maxRight = p.x + tileWidth;
           if (p.y + tileHeight > maxBottom) maxBottom = p.y + tileHeight;
         }
+
         layoutWidth = Math.ceil(maxRight + padding);
         layoutHeight = Math.ceil(maxBottom + padding);
       }
 
       function updateBoardMetrics() {
         var appWidth = Math.min(window.innerWidth - 16, 460);
-        var statsApprox = 76;
+        var statsApprox = 74;
         var headerApprox = 44;
-        var controlsApprox = 60;
+        var controlsApprox = 58;
         var hintsApprox = 22;
-        var extraSpacing = 58;
+        var extraSpacing = 56;
         var availableHeight = window.innerHeight - statsApprox - headerApprox - controlsApprox - hintsApprox - extraSpacing;
-        if (availableHeight < 400) availableHeight = 400;
+
+        if (availableHeight < 420) {
+          availableHeight = 420;
+        }
 
         calculateLayoutBounds();
 
         var boardInnerWidth = appWidth - 8;
-        if (boardInnerWidth < 300) boardInnerWidth = 300;
+        if (boardInnerWidth < 300) {
+          boardInnerWidth = 300;
+        }
 
         var scaleX = boardInnerWidth / layoutWidth;
         var scaleY = availableHeight / layoutHeight;
         boardScale = Math.min(scaleX, scaleY, 1);
 
-        board.style.height = Math.ceil(layoutHeight * boardScale) + "px";
+        var finalWidth = Math.ceil(layoutWidth * boardScale);
+        var finalHeight = Math.ceil(layoutHeight * boardScale);
+
+        board.style.maxWidth = finalWidth + "px";
+        board.style.width = "100%";
+        board.style.height = finalHeight + "px";
       }
 
-      function createTiles() {
+      function createTilesFromSymbols(symbolPool) {
         var positions = getTilePositions();
         var numPairs = Math.floor(positions.length / 2);
-        var selectedTiles = [];
+        var selectedSymbols = [];
 
         for (var i = 0; i < numPairs; i++) {
-          var tileData = tileCatalog[i % tileCatalog.length];
-          selectedTiles.push({ key: tileData.key, type: tileData.type });
-          selectedTiles.push({ key: tileData.key, type: tileData.type });
+          var tileData = symbolPool[i % symbolPool.length];
+          selectedSymbols.push({
+            key: tileData.key,
+            type: tileData.type,
+            src: tileData.src
+          });
+          selectedSymbols.push({
+            key: tileData.key,
+            type: tileData.type,
+            src: tileData.src
+          });
         }
 
-        shuffleArray(selectedTiles);
+        shuffleArray(selectedSymbols);
 
-        tiles = positions.map(function (pos, index) {
-          var tileData = selectedTiles[index];
+        return positions.map(function (pos, index) {
+          var tileData = selectedSymbols[index];
           return {
             id: index,
             x: pos.x,
@@ -396,12 +660,146 @@
             z: pos.z,
             key: tileData.key,
             type: tileData.type,
+            src: tileData.src,
             element: null,
             removed: false
           };
         });
+      }
 
-        totalPairs = numPairs;
+      function cloneTilesData(sourceTiles) {
+        return sourceTiles.map(function (tile) {
+          return {
+            id: tile.id,
+            x: tile.x,
+            y: tile.y,
+            z: tile.z,
+            key: tile.key,
+            type: tile.type,
+            src: tile.src,
+            removed: tile.removed
+          };
+        });
+      }
+
+      function getFreeTilesFromState(stateTiles) {
+        return stateTiles.filter(function (tile) {
+          return !tile.removed && isTileFreeInState(tile, stateTiles);
+        });
+      }
+
+      function countAvailablePairsInState(stateTiles) {
+        var freeTiles = getFreeTilesFromState(stateTiles);
+        var counts = {};
+        var pairsCount = 0;
+        var i;
+
+        for (i = 0; i < freeTiles.length; i++) {
+          counts[freeTiles[i].key] = (counts[freeTiles[i].key] || 0) + 1;
+        }
+
+        for (var key in counts) {
+          if (counts.hasOwnProperty(key)) {
+            pairsCount += Math.floor(counts[key] / 2);
+          }
+        }
+
+        return pairsCount;
+      }
+
+      function getAllAvailableMovesInState(stateTiles) {
+        var freeTiles = getFreeTilesFromState(stateTiles);
+        var grouped = {};
+        var moves = [];
+        var i;
+        var key;
+
+        for (i = 0; i < freeTiles.length; i++) {
+          key = freeTiles[i].key;
+          if (!grouped[key]) {
+            grouped[key] = [];
+          }
+          grouped[key].push(freeTiles[i]);
+        }
+
+        for (key in grouped) {
+          if (grouped.hasOwnProperty(key)) {
+            var group = grouped[key];
+            for (i = 0; i < group.length - 1; i += 2) {
+              moves.push([group[i], group[i + 1]]);
+            }
+          }
+        }
+
+        return moves;
+      }
+
+      function simulateQualityScore(stateTiles, maxSteps) {
+        var cloned = cloneTilesData(stateTiles);
+        var steps = 0;
+        var immediatePairs = countAvailablePairsInState(cloned);
+        var moveHistoryBonus = 0;
+
+        while (steps < maxSteps) {
+          var moves = getAllAvailableMovesInState(cloned);
+          if (!moves.length) {
+            break;
+          }
+
+          moves.sort(function (a, b) {
+            var scoreA = tileExposureScore(a[0], cloned) + tileExposureScore(a[1], cloned);
+            var scoreB = tileExposureScore(b[0], cloned) + tileExposureScore(b[1], cloned);
+            return scoreB - scoreA;
+          });
+
+          var chosen = moves[0];
+          chosen[0].removed = true;
+          chosen[1].removed = true;
+          steps += 1;
+          moveHistoryBonus += Math.max(0, countAvailablePairsInState(cloned) - 1);
+        }
+
+        return immediatePairs * 30 + steps * 18 + moveHistoryBonus * 4;
+      }
+
+      function tileExposureScore(tile, stateTiles) {
+        var freeTiles = getFreeTilesFromState(stateTiles);
+        var countsByZ = {};
+        var i;
+
+        for (i = 0; i < freeTiles.length; i++) {
+          countsByZ[freeTiles[i].z] = (countsByZ[freeTiles[i].z] || 0) + 1;
+        }
+
+        return (10 - tile.z) * 2 + (countsByZ[tile.z] || 0);
+      }
+
+      function chooseBestInitialLayout() {
+        var bestTiles = null;
+        var bestScore = -1;
+        var attempts = 36;
+
+        for (var i = 0; i < attempts; i++) {
+          var candidate = createTilesFromSymbols(tileSymbols);
+          var pairsCount = countAvailablePairsInState(candidate);
+          var quality = simulateQualityScore(candidate, 18);
+          var scoreValue = pairsCount * 50 + quality;
+
+          if (pairsCount >= 4) {
+            scoreValue += 120;
+          }
+          if (pairsCount >= 5) {
+            scoreValue += 80;
+          }
+
+          if (scoreValue > bestScore) {
+            bestScore = scoreValue;
+            bestTiles = candidate;
+          }
+        }
+
+        tiles = bestTiles;
+        totalPairs = Math.floor(tiles.length / 2);
       }
 
       function renderTiles() {
@@ -409,6 +807,7 @@
         boardInner.style.width = layoutWidth + "px";
         boardInner.style.height = layoutHeight + "px";
         boardInner.style.transform = "scale(" + boardScale + ")";
+        boardInner.style.transformOrigin = "top left";
 
         tiles.forEach(function (tile) {
           if (tile.removed) return;
@@ -420,7 +819,7 @@
           element.style.left = tile.x + "px";
           element.style.top = tile.y + "px";
           element.style.zIndex = String(tile.z + 1);
-          element.innerHTML = getTileHTML(tile.key);
+          element.innerHTML = getTileHTML(tile);
 
           element.addEventListener("click", function () {
             onTileClick(tile);
@@ -433,7 +832,7 @@
         updateBlockedStatus();
       }
 
-      function isTileFree(tile) {
+      function isTileFreeInState(tile, stateTiles) {
         if (!tile || tile.removed) return false;
 
         var overlapToleranceX = Math.max(8, Math.floor(tileWidth * 0.28));
@@ -441,23 +840,25 @@
         var sideTolerance = 3;
         var rowTolerance = Math.max(18, Math.floor(tileStepY * 0.28));
 
-        var hasTileAbove = tiles.some(function (t) {
+        var hasTileAbove = stateTiles.some(function (t) {
           if (t.removed || t.z <= tile.z) return false;
+
           var overlapX = Math.abs(t.x - tile.x) < (tileWidth - overlapToleranceX);
           var overlapY = Math.abs(t.y - tile.y) < (tileHeight - overlapToleranceY);
+
           return overlapX && overlapY;
         });
 
         if (hasTileAbove) return false;
 
-        var leftBlocked = tiles.some(function (t) {
+        var leftBlocked = stateTiles.some(function (t) {
           if (t.removed || t.z !== tile.z || t.id === tile.id) return false;
           var sameRow = Math.abs(t.y - tile.y) < rowTolerance;
           var onLeft = Math.abs(t.x - (tile.x - tileStepX)) <= sideTolerance;
           return sameRow && onLeft;
         });
 
-        var rightBlocked = tiles.some(function (t) {
+        var rightBlocked = stateTiles.some(function (t) {
           if (t.removed || t.z !== tile.z || t.id === tile.id) return false;
           var sameRow = Math.abs(t.y - tile.y) < rowTolerance;
           var onRight = Math.abs(t.x - (tile.x + tileStepX)) <= sideTolerance;
@@ -467,11 +868,21 @@
         return !leftBlocked || !rightBlocked;
       }
 
+      function isTileFree(tile) {
+        return isTileFreeInState(tile, tiles);
+      }
+
       function updateBlockedStatus() {
         tiles.forEach(function (tile) {
           if (!tile.element || tile.removed) return;
+
           tile.element.classList.remove("free", "blocked");
-          tile.element.classList.add(isTileFree(tile) ? "free" : "blocked");
+
+          if (isTileFree(tile)) {
+            tile.element.classList.add("free");
+          } else {
+            tile.element.classList.add("blocked");
+          }
         });
       }
 
@@ -508,19 +919,23 @@
           matchTiles(selectedTile, tile);
           selectedTile = null;
         } else {
-          if (selectedTile.element) selectedTile.element.classList.remove("selected");
+          if (selectedTile.element) {
+            selectedTile.element.classList.remove("selected");
+          }
           selectedTile = tile;
         }
       }
 
       function matchTiles(tile1, tile2) {
         var sessionAtStart = gameSessionId;
+
         impact("medium");
 
         if (tile1.element) {
           tile1.element.classList.remove("selected");
           tile1.element.classList.add("matched");
         }
+
         if (tile2.element) {
           tile2.element.classList.remove("selected");
           tile2.element.classList.add("matched");
@@ -532,33 +947,41 @@
           tile1.removed = true;
           tile2.removed = true;
 
-          if (tile1.element && tile1.element.parentNode) tile1.element.parentNode.removeChild(tile1.element);
-          if (tile2.element && tile2.element.parentNode) tile2.element.parentNode.removeChild(tile2.element);
+          if (tile1.element && tile1.element.parentNode) {
+            tile1.element.parentNode.removeChild(tile1.element);
+          }
+          if (tile2.element && tile2.element.parentNode) {
+            tile2.element.parentNode.removeChild(tile2.element);
+          }
 
           tile1.element = null;
           tile2.element = null;
 
           score += 100;
           pairs += 1;
+
           updateStats();
           updateBlockedStatus();
 
           if (pairs >= totalPairs) {
             gameWin();
-          } else if (!hasAvailableMoves()) {
+            return;
+          }
+
+          maybeAssistBoard();
+
+          if (!hasAvailableMoves()) {
             showNoMovesModal();
           }
-        }, 260);
+        }, 280);
       }
 
       function hasAvailableMoves() {
-        var freeTiles = tiles.filter(function (t) { return !t.removed && isTileFree(t); });
-        for (var i = 0; i < freeTiles.length; i++) {
-          for (var j = i + 1; j < freeTiles.length; j++) {
-            if (freeTiles[i].key === freeTiles[j].key) return true;
-          }
-        }
-        return false;
+        return countAvailablePairsInState(tiles) > 0;
+      }
+
+      function countAvailablePairs() {
+        return countAvailablePairsInState(tiles);
       }
 
       function updateStats() {
@@ -568,8 +991,13 @@
 
       function startTimer() {
         gameStartTime = Date.now();
-        if (timerInterval) clearInterval(timerInterval);
+
+        if (timerInterval) {
+          clearInterval(timerInterval);
+        }
+
         timerEl.textContent = "00:00";
+
         timerInterval = setInterval(function () {
           var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
           var minutes = String(Math.floor(elapsed / 60)).padStart(2, "0");
@@ -579,11 +1007,19 @@
       }
 
       function gameWin() {
-        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+
         finalScoreEl.textContent = String(score);
         finalTimeEl.textContent = timerEl.textContent;
         winModal.classList.add("show");
-        if (hasTelegram) tg.MainButton.show();
+
+        if (hasTelegram) {
+          tg.MainButton.show();
+        }
+
         notify("success");
       }
 
@@ -597,73 +1033,161 @@
       }
 
       function showHint() {
-        var freeTiles = tiles.filter(function (t) { return !t.removed && isTileFree(t); });
+        var moves = getAllAvailableMovesInState(tiles);
 
-        for (var i = 0; i < freeTiles.length; i++) {
-          for (var j = i + 1; j < freeTiles.length; j++) {
-            if (freeTiles[i].key === freeTiles[j].key) {
-              var tileA = freeTiles[i];
-              var tileB = freeTiles[j];
-              if (tileA.element) tileA.element.classList.add("hint");
-              if (tileB.element) tileB.element.classList.add("hint");
-              impact("light");
-              setTimeout(function () {
-                if (tileA.element) tileA.element.classList.remove("hint");
-                if (tileB.element) tileB.element.classList.remove("hint");
-              }, 1800);
-              return;
-            }
-          }
+        if (moves.length) {
+          var chosen = moves[0];
+          var tileA = chosen[0];
+          var tileB = chosen[1];
+
+          if (tileA.element) tileA.element.classList.add("hint");
+          if (tileB.element) tileB.element.classList.add("hint");
+
+          impact("light");
+
+          setTimeout(function () {
+            if (tileA.element) tileA.element.classList.remove("hint");
+            if (tileB.element) tileB.element.classList.remove("hint");
+          }, 1800);
+
+          return;
         }
 
         showNoMovesModal();
       }
 
-      function applyTileImages(tileList) {
+      function applySymbolsToTiles(tileList) {
         tileList.forEach(function (tile) {
           if (!tile.element) return;
-          tile.element.innerHTML = getTileHTML(tile.key);
+          tile.element.innerHTML = getTileHTML(tile);
         });
       }
 
-      function shuffleTiles() {
-        var activeTiles = tiles.filter(function (t) { return !t.removed; });
+      function getRemainingTiles() {
+        return tiles.filter(function (t) {
+          return !t.removed;
+        });
+      }
+
+      function trySmartShuffle(minPairsTarget, attemptsLimit) {
+        var activeTiles = getRemainingTiles();
         if (activeTiles.length < 2) {
-          hideModals();
+          return false;
+        }
+
+        var originalActive = activeTiles.map(function (tile) {
+          return {
+            id: tile.id,
+            key: tile.key,
+            type: tile.type,
+            src: tile.src
+          };
+        });
+
+        var bestArrangement = null;
+        var bestScore = -1;
+        var attempts = attemptsLimit || 40;
+
+        for (var attempt = 0; attempt < attempts; attempt++) {
+          var pool = originalActive.slice();
+          shuffleArray(pool);
+
+          activeTiles.forEach(function (tile, index) {
+            tile.key = pool[index].key;
+            tile.type = pool[index].type;
+            tile.src = pool[index].src;
+          });
+
+          var pairCount = countAvailablePairsInState(tiles);
+          var quality = simulateQualityScore(tiles, 14);
+          var scoreValue = pairCount * 50 + quality;
+
+          if (pairCount >= minPairsTarget) {
+            scoreValue += 200;
+          }
+
+          if (scoreValue > bestScore) {
+            bestScore = scoreValue;
+            bestArrangement = pool.slice();
+          }
+
+          if (pairCount >= minPairsTarget) {
+            break;
+          }
+        }
+
+        if (!bestArrangement) {
+          return false;
+        }
+
+        activeTiles.forEach(function (tile, index) {
+          tile.key = bestArrangement[index].key;
+          tile.type = bestArrangement[index].type;
+          tile.src = bestArrangement[index].src;
+        });
+
+        return countAvailablePairsInState(tiles) > 0;
+      }
+
+      function maybeAssistBoard() {
+        var remaining = getRemainingTiles().length;
+        if (remaining < 8) {
+          return;
+        }
+
+        var availablePairs = countAvailablePairs();
+
+        if (availablePairs >= 3) {
           return;
         }
 
         clearSelection();
+        trySmartShuffle(3, 30);
+        applySymbolsToTiles(getRemainingTiles());
+        updateBlockedStatus();
+      }
 
-        var attempts = 0;
-        var success = false;
-        while (attempts < 20 && !success) {
-          var values = activeTiles.map(function (t) {
-            return { key: t.key, type: t.type };
-          });
+      function shuffleTiles() {
+        clearSelection();
 
-          shuffleArray(values);
-
-          activeTiles.forEach(function (tile, index) {
-            tile.key = values[index].key;
-            tile.type = values[index].type;
-          });
-
-          if (hasAvailableMoves()) success = true;
-          attempts++;
+        var remaining = getRemainingTiles();
+        if (remaining.length < 2) {
+          hideModals();
+          return;
         }
 
-        applyTileImages(activeTiles);
+        var targetPairs = remaining.length > 24 ? 4 : 3;
+        var success = trySmartShuffle(targetPairs, 50);
+
+        if (!success) {
+          success = trySmartShuffle(2, 50);
+        }
+
+        applySymbolsToTiles(remaining);
         updateBlockedStatus();
         hideModals();
       }
 
       function ensurePlayableBoard() {
         var attempts = 0;
-        while (attempts < 20 && !hasAvailableMoves()) {
-          shuffleTiles();
-          attempts++;
+
+        while (attempts < 10) {
+          var pairsCount = countAvailablePairs();
+          var quality = simulateQualityScore(tiles, 16);
+
+          if (pairsCount >= 4 && quality >= 220) {
+            return;
+          }
+
+          trySmartShuffle(4, 30);
+          attempts += 1;
         }
+      }
+
+      function rebuildBoardOnly() {
+        calculateLayoutBounds();
+        updateBoardMetrics();
+        renderTiles();
       }
 
       function resetGame() {
@@ -675,24 +1199,24 @@
         }
 
         hideModals();
-        if (hasTelegram) tg.MainButton.hide();
+
+        if (hasTelegram) {
+          tg.MainButton.hide();
+        }
 
         score = 0;
         pairs = 0;
         selectedTile = null;
         tiles = [];
 
+        calculateLayoutBounds();
         updateBoardMetrics();
-        createTiles();
+        chooseBestInitialLayout();
         renderTiles();
         ensurePlayableBoard();
+        renderTiles();
         updateStats();
         startTimer();
-      }
-
-      function rebuildBoardOnly() {
-        updateBoardMetrics();
-        renderTiles();
       }
 
       document.getElementById("shuffleBtn").addEventListener("click", shuffleTiles);
@@ -702,8 +1226,11 @@
       document.getElementById("modalShuffleBtn").addEventListener("click", shuffleTiles);
 
       window.addEventListener("resize", function () {
-        if (tiles.length > 0) rebuildBoardOnly();
-        else updateBoardMetrics();
+        if (tiles.length > 0) {
+          rebuildBoardOnly();
+        } else {
+          updateBoardMetrics();
+        }
       });
 
       if (hasTelegram) {
