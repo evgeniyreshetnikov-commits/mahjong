@@ -1,739 +1,1112 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🀄 Маджонг</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-        
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(180deg, #1a472a 0%, #2d5a3f 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 5px;
-        }
-        
-        .game-header {
-            text-align: center;
-            margin-bottom: 5px;
-            width: 100%;
-            flex-shrink: 0;
-        }
-        
-        .title {
-            font-size: 24px;
-            color: #ffd700;
-            font-weight: 900;
-            text-shadow: 2px 2px 4px #000;
-        }
-        
-        .stats {
-            display: flex;
-            gap: 5px;
-            justify-content: center;
-            margin-bottom: 5px;
-            width: 100%;
-            flex-shrink: 0;
-        }
-        
-        .stat-box {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 6px 10px;
-            border-radius: 8px;
-            border: 2px solid #ffd700;
-            text-align: center;
-            min-width: 65px;
-        }
-        
-        .stat-label {
-            color: #fff;
-            font-size: 9px;
-            text-transform: uppercase;
-        }
-        
-        .stat-value {
-            color: #ffd700;
-            font-size: 18px;
-            font-weight: 900;
-        }
-        
-        /* ПОЛЕ - МЕНЬШЕ ВЫСОТА */
-        .game-board {
-            position: relative;
-            background: #2d5a3f;
-            border-radius: 10px;
-            padding: 10px;
-            border: 3px solid #8b4513;
-            width: 100%;
-            max-width: 380px;
-            height: 480px;
-            flex-shrink: 0;
-            overflow: visible;
-        }
-        
-        /* ПЛИТКА */
-        .tile {
-            position: absolute;
-            width: 48px;
-            height: 64px;
-            background: linear-gradient(145deg, #fffef8 0%, #f5ebd8 100%);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 
-                2px 2px 4px rgba(0,0,0,0.4),
-                3px 3px 6px rgba(0,0,0,0.3);
-            border: 2px solid #d4c4a8;
-            z-index: 1;
-        }
-        
-        /* СИМВОЛ - КРУПНЫЙ И ЦВЕТНОЙ */
-        .tile-symbol {
-            font-size: 44px;
-            line-height: 1;
-            font-weight: 900;
-            /* Цвета по типам */
-        }
-        
-        .tile[data-type="bamboo"] .tile-symbol,
-        .tile[data-type="character"] .tile-symbol {
-            color: #006400;
-            text-shadow: 0 0 3px #000, 0 0 6px #000;
-        }
-        
-        .tile[data-type="circle"] .tile-symbol,
-        .tile[data-type="dragon"] .tile-symbol {
-            color: #cc0000;
-            text-shadow: 0 0 3px #000, 0 0 6px #000;
-        }
-        
-        .tile[data-type="wind"] .tile-symbol,
-        .tile[data-type="flower"] .tile-symbol {
-            color: #000080;
-            text-shadow: 0 0 3px #000, 0 0 6px #000;
-        }
-        
-        .tile.selected {
-            background: #ffd700;
-            box-shadow: 0 0 25px #ffd700, 0 0 50px #ffaa00;
-            z-index: 100;
-            border: 3px solid #ff6600;
-            transform: scale(1.1);
-        }
-        
-        .tile.blocked {
-            filter: brightness(0.3);
-            cursor: not-allowed;
-        }
-        
-        .tile.free {
-            filter: brightness(1);
-        }
-        
-        .tile.matched {
-            opacity: 0;
-            transform: scale(0.6);
-            transition: all 0.25s;
-        }
-        
-        .tile.hint {
-            box-shadow: 0 0 30px #00ff00, 0 0 60px #00ff00 !important;
-            z-index: 101;
-            animation: pulse 0.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1.1); }
-            50% { transform: scale(1.15); }
-        }
-        
-        /* КНОПКИ - ВИДНЫ ВСЕГДА */
-        .controls {
-            margin-top: 8px;
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: 100%;
-            max-width: 380px;
-            z-index: 1000;
-            flex-shrink: 0;
-        }
-        
-        .btn {
-            padding: 12px 14px;
-            font-size: 12px;
-            font-weight: 900;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-transform: uppercase;
-            flex: 1;
-            min-width: 85px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(145deg, #ffd700 0%, #ffaa00 100%);
-            color: #1a472a;
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(145deg, #8b4513 0%, #654321 100%);
-            color: #fff;
-        }
-        
-        .hints {
-            margin-top: 5px;
-            color: #fff;
-            font-size: 10px;
-            text-align: center;
-            opacity: 0.8;
-            flex-shrink: 0;
-        }
-        
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        
-        .modal.show {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: linear-gradient(145deg, #1a472a 0%, #2d5a3f 100%);
-            padding: 25px 20px;
-            border-radius: 15px;
-            text-align: center;
-            border: 3px solid #ffd700;
-            max-width: 85%;
-        }
-        
-        .modal-title {
-            font-size: 26px;
-            color: #ffd700;
-            margin-bottom: 12px;
-            font-weight: 900;
-        }
-        
-        .modal-text {
-            font-size: 16px;
-            color: #fff;
-            margin-bottom: 15px;
-        }
-        
-        /* АДАПТАЦИЯ */
-        @media (max-height: 700px) {
-            .game-board {
-                height: 420px;
-            }
-            .tile {
-                width: 44px;
-                height: 58px;
-            }
-            .tile-symbol {
-                font-size: 40px;
-            }
-        }
-        
-        @media (max-width: 360px) {
-            .game-board {
-                max-width: 340px;
-                height: 440px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>🀄 Маджонг</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-top: #1a472a;
+      --bg-bottom: #2d5a3f;
+      --panel-bg: rgba(255, 255, 255, 0.16);
+      --panel-border: #ffd700;
+      --title-color: #ffd700;
+      --text-light: #ffffff;
+      --text-dark: #1a472a;
+      --board-bg: #2d5a3f;
+      --board-border: #8b4513;
+      --tile-border: #d4c4a8;
+      --tile-front-1: #fffef8;
+      --tile-front-2: #f5ebd8;
+      --tile-shadow-1: rgba(0, 0, 0, 0.42);
+      --tile-shadow-2: rgba(0, 0, 0, 0.28);
+      --tile-highlight: rgba(255, 255, 255, 0.92);
+      --selected-1: #ffd700;
+      --selected-2: #ffaa00;
+      --selected-border: #ff6600;
+      --hint-color: #00ff66;
+      --modal-bg-1: #1a472a;
+      --modal-bg-2: #2d5a3f;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      overflow-x: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: calc(env(safe-area-inset-top, 0px) + 8px) 8px calc(env(safe-area-inset-bottom, 0px) + 10px);
+      color: var(--text-light);
+    }
+
+    .game-header {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .title {
+      font-size: 28px;
+      line-height: 1.1;
+      font-weight: 900;
+      color: var(--title-color);
+      text-shadow: 0 3px 8px rgba(0, 0, 0, 0.65);
+      letter-spacing: 0.4px;
+    }
+
+    .stats {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: nowrap;
+    }
+
+    .stat-box {
+      min-width: 82px;
+      padding: 10px 12px;
+      text-align: center;
+      border-radius: 12px;
+      background: var(--panel-bg);
+      border: 3px solid var(--panel-border);
+      backdrop-filter: blur(3px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.88);
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 21px;
+      font-weight: 900;
+      color: var(--title-color);
+    }
+
+    .game-board {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 580px;
+      border-radius: 14px;
+      border: 4px solid var(--board-border);
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.08), transparent 28%),
+        linear-gradient(180deg, #2f6547 0%, #27543b 100%);
+      box-shadow:
+        0 12px 34px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+      padding: 12px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .tile {
+      position: absolute;
+      width: 54px;
+      height: 72px;
+      border-radius: 11px;
+      border: 3px solid var(--tile-border);
+      background: linear-gradient(145deg, var(--tile-front-1) 0%, var(--tile-front-2) 100%);
+      box-shadow:
+        0 3px 6px var(--tile-shadow-1),
+        0 7px 14px var(--tile-shadow-2),
+        inset 0 2px 4px var(--tile-highlight);
+      overflow: hidden;
+      cursor: pointer;
+      transition:
+        transform 0.15s ease,
+        filter 0.15s ease,
+        box-shadow 0.15s ease,
+        opacity 0.25s ease;
+      transform-origin: center center;
+    }
+
+    .tile::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      pointer-events: none;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+    }
+
+    .tile-face {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px;
+    }
+
+    .tile-symbol {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1;
+      font-size: 47px;
+      font-weight: 900;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      font-family:
+        "Noto Color Emoji",
+        "Apple Color Emoji",
+        "Segoe UI Emoji",
+        "Segoe UI Symbol",
+        sans-serif;
+      filter: saturate(1.12) contrast(1.04);
+      transform: translateY(-1px);
+      pointer-events: none;
+    }
+
+    .tile-type-bamboo {
+      color: #12753b;
+    }
+
+    .tile-type-character {
+      color: #1e1e1e;
+    }
+
+    .tile-type-circle {
+      color: #c61f1f;
+    }
+
+    .tile-type-dragon {
+      color: #cf1d1d;
+    }
+
+    .tile-type-wind {
+      color: #183d9e;
+    }
+
+    .tile-type-flower {
+      color: #7b1fa2;
+    }
+
+    .tile.free {
+      filter: brightness(1);
+    }
+
+    .tile.blocked {
+      filter: brightness(0.42) saturate(0.82);
+      cursor: not-allowed;
+    }
+
+    .tile.selected {
+      background: linear-gradient(145deg, var(--selected-1) 0%, var(--selected-2) 100%);
+      border: 4px solid var(--selected-border);
+      box-shadow:
+        0 0 18px rgba(255, 215, 0, 0.9),
+        0 0 32px rgba(255, 170, 0, 0.65),
+        0 8px 14px rgba(0, 0, 0, 0.32);
+      transform: scale(1.08);
+    }
+
+    .tile.hint {
+      border: 4px solid var(--hint-color);
+      box-shadow:
+        0 0 16px rgba(0, 255, 102, 0.95),
+        0 0 30px rgba(0, 255, 102, 0.55),
+        0 8px 14px rgba(0, 0, 0, 0.28);
+      animation: hintPulse 0.7s ease-in-out infinite;
+    }
+
+    .tile.matched {
+      opacity: 0;
+      transform: scale(0.6);
+      pointer-events: none;
+    }
+
+    @keyframes hintPulse {
+      0%, 100% {
+        transform: scale(1.04);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    .controls {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      z-index: 10;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 14px 12px;
+      border: none;
+      border-radius: 11px;
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(145deg, #ffd700 0%, #ffaa00 100%);
+      color: var(--text-dark);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(145deg, #8b4513 0%, #654321 100%);
+      color: #fff;
+    }
+
+    .hints {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.9;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 2000;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 360px;
+      padding: 28px 22px;
+      text-align: center;
+      border-radius: 16px;
+      border: 4px solid #ffd700;
+      background: linear-gradient(145deg, var(--modal-bg-1) 0%, var(--modal-bg-2) 100%);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+    }
+
+    .modal-title {
+      margin-bottom: 14px;
+      font-size: 30px;
+      font-weight: 900;
+      color: #ffd700;
+    }
+
+    .modal-text {
+      margin-bottom: 14px;
+      font-size: 18px;
+      color: #fff;
+    }
+
+    @media (max-width: 390px) {
+      .title {
+        font-size: 26px;
+      }
+
+      .game-board {
+        max-width: 372px;
+        height: 545px;
+      }
+
+      .tile {
+        width: 50px;
+        height: 68px;
+      }
+
+      .tile-symbol {
+        font-size: 43px;
+      }
+
+      .stat-box {
+        min-width: 74px;
+        padding: 10px 10px;
+      }
+
+      .stat-value {
+        font-size: 19px;
+      }
+
+      .btn {
+        font-size: 12px;
+        padding: 13px 10px;
+      }
+    }
+
+    @media (max-width: 350px) {
+      .game-board {
+        max-width: 332px;
+        height: 500px;
+      }
+
+      .tile {
+        width: 46px;
+        height: 64px;
+      }
+
+      .tile-symbol {
+        font-size: 39px;
+      }
+
+      .stats {
+        gap: 6px;
+      }
+
+      .stat-box {
+        min-width: 68px;
+        padding: 8px;
+      }
+
+      .stat-label {
+        font-size: 10px;
+      }
+
+      .stat-value {
+        font-size: 18px;
+      }
+    }
+
+    @media (min-width: 430px) {
+      .game-board {
+        max-width: 460px;
+        height: 620px;
+      }
+
+      .tile {
+        width: 58px;
+        height: 76px;
+      }
+
+      .tile-symbol {
+        font-size: 50px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="game-header">
-        <h1 class="title">🀄 Маджонг</h1>
-    </div>
-    
-    <div class="stats">
-        <div class="stat-box">
-            <div class="stat-label">Счёт</div>
-            <div class="stat-value" id="score">0</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">Пары</div>
-            <div class="stat-value" id="pairs">0/0</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">Время</div>
-            <div class="stat-value" id="timer">00:00</div>
-        </div>
-    </div>
-    
-    <div class="game-board" id="board"></div>
-    
-    <div class="controls">
-        <button class="btn btn-primary" onclick="shuffleTiles()">Перемешать</button>
-        <button class="btn btn-secondary" onclick="resetGame()">Новая игра</button>
-        <button class="btn btn-secondary" onclick="showHint()">Подсказка</button>
-    </div>
-    
-    <div class="hints">Нажмите на две одинаковые СВОБОДНЫЕ плитки</div>
-    
-    <div class="modal" id="winModal">
-        <div class="modal-content">
-            <div class="modal-title">🎉 Победа!</div>
-            <div class="modal-text">Счёт: <span id="finalScore">0</span></div>
-            <div class="modal-text">Время: <span id="finalTime">00:00</span></div>
-            <button class="btn btn-primary" onclick="resetGame()">Играть снова</button>
-        </div>
-    </div>
-    
-    <div class="modal" id="noMovesModal">
-        <div class="modal-content">
-            <div class="modal-title">⚠️ Нет ходов!</div>
-            <button class="btn btn-primary" onclick="shuffleTiles()">Перемешать</button>
-        </div>
-    </div>
+  <div class="game-header">
+    <h1 class="title">🀄 Маджонг</h1>
+  </div>
 
-    <script>
-        var tg = window.Telegram.WebApp;
+  <div class="stats">
+    <div class="stat-box">
+      <div class="stat-label">Счёт</div>
+      <div class="stat-value" id="score">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Пары</div>
+      <div class="stat-value" id="pairs">0/0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Время</div>
+      <div class="stat-value" id="timer">00:00</div>
+    </div>
+  </div>
+
+  <div class="game-board" id="board"></div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="shuffleBtn" type="button">Перемешать</button>
+    <button class="btn btn-secondary" id="resetBtn" type="button">Новая игра</button>
+    <button class="btn btn-secondary" id="hintBtn" type="button">Подсказка</button>
+  </div>
+
+  <div class="hints">Нажмите на две одинаковые свободные плитки</div>
+
+  <div class="modal" id="winModal">
+    <div class="modal-content">
+      <div class="modal-title">🎉 Победа!</div>
+      <div class="modal-text">Вы очистили все плитки!</div>
+      <div class="modal-text">Счёт: <span id="finalScore">0</span></div>
+      <div class="modal-text">Время: <span id="finalTime">00:00</span></div>
+      <button class="btn btn-primary" id="playAgainBtn" type="button">Играть снова</button>
+    </div>
+  </div>
+
+  <div class="modal" id="noMovesModal">
+    <div class="modal-content">
+      <div class="modal-title">⚠️ Нет ходов!</div>
+      <div class="modal-text">Доступных пар не осталось</div>
+      <button class="btn btn-primary" id="modalShuffleBtn" type="button">Перемешать</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var tg = null;
+      var hasTelegram = false;
+
+      if (window.Telegram && window.Telegram.WebApp) {
+        tg = window.Telegram.WebApp;
+        hasTelegram = true;
+      }
+
+      if (hasTelegram) {
         tg.ready();
         tg.expand();
-        
-        if (tg.colorScheme === 'light') {
-            document.body.style.background = 'linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%)';
+
+        if (tg.colorScheme === "light") {
+          document.documentElement.style.setProperty("--bg-top", "#dfece0");
+          document.documentElement.style.setProperty("--bg-bottom", "#cadcc9");
+          document.documentElement.style.setProperty("--panel-bg", "rgba(255,255,255,0.32)");
+          document.documentElement.style.setProperty("--text-light", "#ffffff");
+          document.documentElement.style.setProperty("--board-bg", "#35684b");
         }
-        
-        tg.MainButton.setText('🎮 ИГРАТЬ СНОВА');
+
+        tg.MainButton.setText("🎮 ИГРАТЬ СНОВА");
         tg.MainButton.setParams({
-            color: '#2d5a3f',
-            text_color: '#ffd700'
+          color: "#2d5a3f",
+          text_color: "#ffd700"
         });
-        
-        var tileSymbols = [
-            { symbol: '🀀', type: 'wind' }, { symbol: '🀁', type: 'wind' },
-            { symbol: '🀂', type: 'wind' }, { symbol: '🀃', type: 'wind' },
-            { symbol: '🀄', type: 'dragon' }, { symbol: '🀅', type: 'dragon' },
-            { symbol: '🀆', type: 'dragon' },
-            { symbol: '🀇', type: 'character' }, { symbol: '🀈', type: 'character' },
-            { symbol: '🀉', type: 'character' }, { symbol: '🀊', type: 'character' },
-            { symbol: '🀋', type: 'character' }, { symbol: '🀌', type: 'character' },
-            { symbol: '🀍', type: 'character' }, { symbol: '🀎', type: 'character' },
-            { symbol: '🀏', type: 'character' },
-            { symbol: '🀐', type: 'bamboo' }, { symbol: '🀑', type: 'bamboo' },
-            { symbol: '🀒', type: 'bamboo' }, { symbol: '🀓', type: 'bamboo' },
-            { symbol: '🀔', type: 'bamboo' }, { symbol: '🀕', type: 'bamboo' },
-            { symbol: '🀖', type: 'bamboo' }, { symbol: '🀗', type: 'bamboo' },
-            { symbol: '🀘', type: 'bamboo' },
-            { symbol: '🀙', type: 'circle' }, { symbol: '🀚', type: 'circle' },
-            { symbol: '🀛', type: 'circle' }, { symbol: '🀜', type: 'circle' },
-            { symbol: '🀝', type: 'circle' }, { symbol: '🀞', type: 'circle' },
-            { symbol: '🀟', type: 'circle' }, { symbol: '🀠', type: 'circle' },
-            { symbol: '🀡', type: 'circle' }
-        ];
+        tg.MainButton.hide();
+      }
 
-        var tiles = [];
-        var selectedTile = null;
-        var score = 0;
-        var pairs = 0;
-        var gameStartTime = 0;
-        var timerInterval = null;
-        var totalPairs = 0;
-        
-        var tileWidth = 48;
-        var tileHeight = 64;
-        var tileStepX = 50;
-        var tileStepY = 66;
-        var padding = 10;
+      var board = document.getElementById("board");
+      var scoreEl = document.getElementById("score");
+      var pairsEl = document.getElementById("pairs");
+      var timerEl = document.getElementById("timer");
+      var winModal = document.getElementById("winModal");
+      var noMovesModal = document.getElementById("noMovesModal");
+      var finalScoreEl = document.getElementById("finalScore");
+      var finalTimeEl = document.getElementById("finalTime");
 
-        function getTilePositions() {
-            var positions = [];
-            
-            for (var row = 0; row < 6; row++) {
-                for (var col = 0; col < 7; col++) {
-                    positions.push({
-                        x: padding + col * tileStepX,
-                        y: padding + row * tileStepY,
-                        z: 0
-                    });
-                }
-            }
-            
-            for (var row = 0; row < 5; row++) {
-                for (var col = 0; col < 6; col++) {
-                    positions.push({
-                        x: padding + tileStepX + col * tileStepX,
-                        y: padding + tileStepY/2 + row * tileStepY,
-                        z: 1
-                    });
-                }
-            }
-            
-            for (var row = 0; row < 4; row++) {
-                for (var col = 0; col < 5; col++) {
-                    positions.push({
-                        x: padding + 2 * tileStepX + col * tileStepX,
-                        y: padding + tileStepY + row * tileStepY,
-                        z: 2
-                    });
-                }
-            }
-            
-            for (var row = 0; row < 3; row++) {
-                for (var col = 0; col < 4; col++) {
-                    positions.push({
-                        x: padding + 2.5 * tileStepX + col * tileStepX,
-                        y: padding + 1.5 * tileStepY + row * tileStepY,
-                        z: 3
-                    });
-                }
-            }
-            
-            for (var row = 0; row < 2; row++) {
-                for (var col = 0; col < 3; col++) {
-                    positions.push({
-                        x: padding + 3 * tileStepX + col * tileStepX,
-                        y: padding + 2 * tileStepY + row * tileStepY,
-                        z: 4
-                    });
-                }
-            }
-            
-            positions.push({ x: padding + 3.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
-            positions.push({ x: padding + 4.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
-            
-            return positions;
+      var tileSymbols = [
+        { symbol: "🀀", type: "wind" }, { symbol: "🀁", type: "wind" },
+        { symbol: "🀂", type: "wind" }, { symbol: "🀃", type: "wind" },
+        { symbol: "🀄", type: "dragon" }, { symbol: "🀅", type: "dragon" },
+        { symbol: "🀆", type: "dragon" },
+        { symbol: "🀇", type: "character" }, { symbol: "🀈", type: "character" },
+        { symbol: "🀉", type: "character" }, { symbol: "🀊", type: "character" },
+        { symbol: "🀋", type: "character" }, { symbol: "🀌", type: "character" },
+        { symbol: "🀍", type: "character" }, { symbol: "🀎", type: "character" },
+        { symbol: "🀏", type: "character" },
+        { symbol: "🀐", type: "bamboo" }, { symbol: "🀑", type: "bamboo" },
+        { symbol: "🀒", type: "bamboo" }, { symbol: "🀓", type: "bamboo" },
+        { symbol: "🀔", type: "bamboo" }, { symbol: "🀕", type: "bamboo" },
+        { symbol: "🀖", type: "bamboo" }, { symbol: "🀗", type: "bamboo" },
+        { symbol: "🀘", type: "bamboo" },
+        { symbol: "🀙", type: "circle" }, { symbol: "🀚", type: "circle" },
+        { symbol: "🀛", type: "circle" }, { symbol: "🀜", type: "circle" },
+        { symbol: "🀝", type: "circle" }, { symbol: "🀞", type: "circle" },
+        { symbol: "🀟", type: "circle" }, { symbol: "🀠", type: "circle" },
+        { symbol: "🀡", type: "circle" }
+      ];
+
+      var tiles = [];
+      var selectedTile = null;
+      var score = 0;
+      var pairs = 0;
+      var totalPairs = 0;
+      var gameStartTime = 0;
+      var timerInterval = null;
+      var gameSessionId = 0;
+
+      var tileWidth = 54;
+      var tileHeight = 72;
+      var tileStepX = 56;
+      var tileStepY = 74;
+      var padding = 12;
+
+      function syncDimensions() {
+        var width = window.innerWidth || document.documentElement.clientWidth;
+
+        if (width <= 350) {
+          tileWidth = 46;
+          tileHeight = 64;
+          tileStepX = 48;
+          tileStepY = 66;
+        } else if (width <= 390) {
+          tileWidth = 50;
+          tileHeight = 68;
+          tileStepX = 52;
+          tileStepY = 70;
+        } else if (width >= 430) {
+          tileWidth = 58;
+          tileHeight = 76;
+          tileStepX = 60;
+          tileStepY = 78;
+        } else {
+          tileWidth = 54;
+          tileHeight = 72;
+          tileStepX = 56;
+          tileStepY = 74;
+        }
+      }
+
+      function impact(type) {
+        if (hasTelegram && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
+          tg.HapticFeedback.impactOccurred(type);
+        }
+      }
+
+      function notify(type) {
+        if (hasTelegram && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred) {
+          tg.HapticFeedback.notificationOccurred(type);
+        }
+      }
+
+      function getTileHTML(symbol, type) {
+        return (
+          '<div class="tile-face">' +
+            '<div class="tile-symbol tile-type-' + type + '">' + symbol + "</div>" +
+          "</div>"
+        );
+      }
+
+      function getTilePositions() {
+        var positions = [];
+        var row;
+        var col;
+
+        for (row = 0; row < 6; row++) {
+          for (col = 0; col < 7; col++) {
+            positions.push({
+              x: padding + col * tileStepX,
+              y: padding + row * tileStepY,
+              z: 0
+            });
+          }
         }
 
-        function createTiles() {
-            var positions = getTilePositions();
-            var numPairs = Math.floor(positions.length / 2);
-            var selectedSymbols = [];
-            
-            for (var i = 0; i < numPairs; i++) {
-                var tileData = tileSymbols[i % tileSymbols.length];
-                selectedSymbols.push({ symbol: tileData.symbol, type: tileData.type });
-                selectedSymbols.push({ symbol: tileData.symbol, type: tileData.type });
-            }
-            
-            for (var i = selectedSymbols.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var temp = selectedSymbols[i];
-                selectedSymbols[i] = selectedSymbols[j];
-                selectedSymbols[j] = temp;
-            }
-            
-            tiles = positions.map(function(pos, index) {
-                return {
-                    id: index,
-                    x: pos.x,
-                    y: pos.y,
-                    z: pos.z,
-                    symbol: selectedSymbols[index] ? selectedSymbols[index].symbol : '🀀',
-                    type: selectedSymbols[index] ? selectedSymbols[index].type : 'character',
-                    element: null,
-                    removed: false
-                };
+        for (row = 0; row < 5; row++) {
+          for (col = 0; col < 6; col++) {
+            positions.push({
+              x: padding + tileStepX + col * tileStepX,
+              y: padding + tileStepY / 2 + row * tileStepY,
+              z: 1
             });
-            
-            totalPairs = numPairs;
+          }
         }
 
-        function renderTiles() {
-            var board = document.getElementById('board');
-            if (!board) return;
-            
-            board.innerHTML = '';
-            
-            tiles.forEach(function(tile) {
-                if (tile.removed) return;
-                
-                var element = document.createElement('div');
-                element.className = 'tile';
-                element.setAttribute('data-type', tile.type);
-                element.style.width = tileWidth + 'px';
-                element.style.height = tileHeight + 'px';
-                element.style.left = tile.x + 'px';
-                element.style.top = tile.y + 'px';
-                element.style.zIndex = tile.z + 1;
-                
-                var symbolEl = document.createElement('span');
-                symbolEl.className = 'tile-symbol';
-                symbolEl.textContent = tile.symbol;
-                element.appendChild(symbolEl);
-                
-                element.addEventListener('click', function() {
-                    onTileClick(tile);
-                });
-                
-                tile.element = element;
-                board.appendChild(element);
+        for (row = 0; row < 4; row++) {
+          for (col = 0; col < 5; col++) {
+            positions.push({
+              x: padding + 2 * tileStepX + col * tileStepX,
+              y: padding + tileStepY + row * tileStepY,
+              z: 2
             });
-            
-            setTimeout(function() {
-                updateBlockedStatus();
-            }, 50);
+          }
         }
 
-        function isTileFree(tile) {
-            var hasTileAbove = tiles.some(function(t) {
-                if (t.removed || t.z <= tile.z) return false;
-                var overlapX = Math.abs(t.x - tile.x) < tileWidth - 10;
-                var overlapY = Math.abs(t.y - tile.y) < tileHeight - 10;
-                return overlapX && overlapY;
+        for (row = 0; row < 3; row++) {
+          for (col = 0; col < 4; col++) {
+            positions.push({
+              x: padding + 2.5 * tileStepX + col * tileStepX,
+              y: padding + 1.5 * tileStepY + row * tileStepY,
+              z: 3
             });
-            
-            if (hasTileAbove) return false;
-            
-            var leftBlocked = tiles.some(function(t) {
-                if (t.removed || t.z !== tile.z) return false;
-                var sameRow = Math.abs(t.y - tile.y) < 20;
-                var onLeft = t.x === tile.x - tileWidth;
-                return sameRow && onLeft;
-            });
-            
-            var rightBlocked = tiles.some(function(t) {
-                if (t.removed || t.z !== tile.z) return false;
-                var sameRow = Math.abs(t.y - tile.y) < 20;
-                var onRight = t.x === tile.x + tileWidth;
-                return sameRow && onRight;
-            });
-            
-            return !leftBlocked || !rightBlocked;
+          }
         }
 
-        function updateBlockedStatus() {
-            tiles.forEach(function(tile) {
-                if (tile.element && !tile.removed) {
-                    if (isTileFree(tile)) {
-                        tile.element.classList.remove('blocked');
-                        tile.element.classList.add('free');
-                    } else {
-                        tile.element.classList.add('blocked');
-                        tile.element.classList.remove('free');
-                    }
-                }
+        for (row = 0; row < 2; row++) {
+          for (col = 0; col < 3; col++) {
+            positions.push({
+              x: padding + 3 * tileStepX + col * tileStepX,
+              y: padding + 2 * tileStepY + row * tileStepY,
+              z: 4
             });
+          }
         }
 
-        function onTileClick(tile) {
-            if (tile.removed || !isTileFree(tile)) {
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('error');
-                }
-                return;
-            }
-            
-            if (selectedTile === tile) {
-                tile.element.classList.remove('selected');
-                selectedTile = null;
-                return;
-            }
-            
-            tile.element.classList.add('selected');
-            
-            if (selectedTile) {
-                if (selectedTile.symbol === tile.symbol) {
-                    matchTiles(selectedTile, tile);
-                    selectedTile = null;
-                } else {
-                    selectedTile.element.classList.remove('selected');
-                    selectedTile = tile;
-                }
-            } else {
-                selectedTile = tile;
-            }
+        positions.push({ x: padding + 3.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
+        positions.push({ x: padding + 4.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
+
+        return positions;
+      }
+
+      function shuffleArray(arr) {
+        var i;
+        for (i = arr.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = tmp;
+        }
+      }
+
+      function createTiles() {
+        var positions = getTilePositions();
+        var numPairs = Math.floor(positions.length / 2);
+        var selectedSymbols = [];
+        var i;
+
+        for (i = 0; i < numPairs; i++) {
+          var tileData = tileSymbols[i % tileSymbols.length];
+          selectedSymbols.push({ symbol: tileData.symbol, type: tileData.type });
+          selectedSymbols.push({ symbol: tileData.symbol, type: tileData.type });
         }
 
-        function matchTiles(tile1, tile2) {
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('medium');
-            }
-            
-            tile1.element.classList.remove('selected');
-            tile2.element.classList.remove('selected');
-            tile1.element.classList.add('matched');
-            tile2.element.classList.add('matched');
-            
-            setTimeout(function() {
-                tile1.removed = true;
-                tile2.removed = true;
-                if (tile1.element && tile1.element.parentNode) {
-                    tile1.element.parentNode.removeChild(tile1.element);
-                }
-                if (tile2.element && tile2.element.parentNode) {
-                    tile2.element.parentNode.removeChild(tile2.element);
-                }
-                
-                score += 100;
-                pairs++;
-                updateStats();
-                updateBlockedStatus();
-                
-                if (pairs >= totalPairs) {
-                    gameWin();
-                } else if (!hasAvailableMoves()) {
-                    showNoMovesModal();
-                }
-            }, 300);
+        shuffleArray(selectedSymbols);
+
+        tiles = positions.map(function (pos, index) {
+          var tileData = selectedSymbols[index] || { symbol: "🀀", type: "wind" };
+          return {
+            id: index,
+            x: pos.x,
+            y: pos.y,
+            z: pos.z,
+            symbol: tileData.symbol,
+            type: tileData.type,
+            element: null,
+            removed: false
+          };
+        });
+
+        totalPairs = numPairs;
+      }
+
+      function renderTiles() {
+        board.innerHTML = "";
+
+        tiles.forEach(function (tile) {
+          if (tile.removed) {
+            return;
+          }
+
+          var element = document.createElement("div");
+          element.className = "tile";
+          element.style.width = tileWidth + "px";
+          element.style.height = tileHeight + "px";
+          element.style.left = tile.x + "px";
+          element.style.top = tile.y + "px";
+          element.style.zIndex = String(tile.z + 1);
+          element.setAttribute("data-type", tile.type);
+          element.innerHTML = getTileHTML(tile.symbol, tile.type);
+
+          element.addEventListener("click", function () {
+            onTileClick(tile);
+          });
+
+          tile.element = element;
+          board.appendChild(element);
+        });
+
+        updateBlockedStatus();
+      }
+
+      function isTileFree(tile) {
+        if (!tile || tile.removed) {
+          return false;
         }
 
-        function hasAvailableMoves() {
-            var freeTiles = tiles.filter(function(t) {
-                return !t.removed && isTileFree(t);
-            });
-            
-            for (var i = 0; i < freeTiles.length; i++) {
-                for (var j = i + 1; j < freeTiles.length; j++) {
-                    if (freeTiles[i].symbol === freeTiles[j].symbol) {
-                        return true;
-                    }
-                }
-            }
+        var overlapToleranceX = Math.max(8, Math.floor(tileWidth * 0.28));
+        var overlapToleranceY = Math.max(8, Math.floor(tileHeight * 0.28));
+        var sideTolerance = 3;
+        var rowTolerance = Math.max(18, Math.floor(tileStepY * 0.28));
+
+        var hasTileAbove = tiles.some(function (t) {
+          if (t.removed || t.z <= tile.z) {
             return false;
+          }
+
+          var overlapX = Math.abs(t.x - tile.x) < (tileWidth - overlapToleranceX);
+          var overlapY = Math.abs(t.y - tile.y) < (tileHeight - overlapToleranceY);
+
+          return overlapX && overlapY;
+        });
+
+        if (hasTileAbove) {
+          return false;
         }
 
-        function updateStats() {
-            var scoreEl = document.getElementById('score');
-            var pairsEl = document.getElementById('pairs');
-            if (scoreEl) scoreEl.textContent = score;
-            if (pairsEl) pairsEl.textContent = pairs + '/' + totalPairs;
+        var leftBlocked = tiles.some(function (t) {
+          if (t.removed || t.z !== tile.z || t.id === tile.id) {
+            return false;
+          }
+
+          var sameRow = Math.abs(t.y - tile.y) < rowTolerance;
+          var onLeft = Math.abs(t.x - (tile.x - tileStepX)) <= sideTolerance;
+
+          return sameRow && onLeft;
+        });
+
+        var rightBlocked = tiles.some(function (t) {
+          if (t.removed || t.z !== tile.z || t.id === tile.id) {
+            return false;
+          }
+
+          var sameRow = Math.abs(t.y - tile.y) < rowTolerance;
+          var onRight = Math.abs(t.x - (tile.x + tileStepX)) <= sideTolerance;
+
+          return sameRow && onRight;
+        });
+
+        return !leftBlocked || !rightBlocked;
+      }
+
+      function updateBlockedStatus() {
+        tiles.forEach(function (tile) {
+          if (!tile.element || tile.removed) {
+            return;
+          }
+
+          tile.element.classList.remove("free", "blocked");
+
+          if (isTileFree(tile)) {
+            tile.element.classList.add("free");
+          } else {
+            tile.element.classList.add("blocked");
+          }
+        });
+      }
+
+      function clearSelection() {
+        if (selectedTile && selectedTile.element) {
+          selectedTile.element.classList.remove("selected");
+        }
+        selectedTile = null;
+      }
+
+      function onTileClick(tile) {
+        if (!tile || tile.removed || !tile.element) {
+          return;
         }
 
-        function startTimer() {
-            gameStartTime = Date.now();
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(function() {
-                var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
-                var minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
-                var seconds = (elapsed % 60).toString().padStart(2, '0');
-                var timerEl = document.getElementById('timer');
-                if (timerEl) timerEl.textContent = minutes + ':' + seconds;
-            }, 1000);
+        if (!isTileFree(tile)) {
+          notify("error");
+          return;
         }
 
-        function gameWin() {
-            clearInterval(timerInterval);
-            var finalTime = document.getElementById('timer').textContent;
-            document.getElementById('finalScore').textContent = score;
-            document.getElementById('finalTime').textContent = finalTime;
-            document.getElementById('winModal').classList.add('show');
-            
-            tg.MainButton.show();
-            
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('success');
-            }
+        if (selectedTile && selectedTile.id === tile.id) {
+          tile.element.classList.remove("selected");
+          selectedTile = null;
+          return;
         }
 
-        function showNoMovesModal() {
-            document.getElementById('noMovesModal').classList.add('show');
+        if (!selectedTile) {
+          selectedTile = tile;
+          tile.element.classList.add("selected");
+          return;
         }
 
-        function showHint() {
-            var freeTiles = tiles.filter(function(t) {
-                return !t.removed && isTileFree(t);
-            });
-            
-            for (var i = 0; i < freeTiles.length; i++) {
-                for (var j = i + 1; j < freeTiles.length; j++) {
-                    if (freeTiles[i].symbol === freeTiles[j].symbol) {
-                        freeTiles[i].element.classList.add('hint');
-                        freeTiles[j].element.classList.add('hint');
-                        
-                        if (tg.HapticFeedback) {
-                            tg.HapticFeedback.impactOccurred('light');
-                        }
-                        
-                        setTimeout(function() {
-                            freeTiles[i].element.classList.remove('hint');
-                            freeTiles[j].element.classList.remove('hint');
-                        }, 2000);
-                        
-                        return;
-                    }
-                }
-            }
-            
+        tile.element.classList.add("selected");
+
+        if (selectedTile.symbol === tile.symbol) {
+          matchTiles(selectedTile, tile);
+          selectedTile = null;
+        } else {
+          if (selectedTile.element) {
+            selectedTile.element.classList.remove("selected");
+          }
+          selectedTile = tile;
+        }
+      }
+
+      function matchTiles(tile1, tile2) {
+        var sessionAtStart = gameSessionId;
+
+        impact("medium");
+
+        if (tile1.element) {
+          tile1.element.classList.remove("selected");
+          tile1.element.classList.add("matched");
+        }
+
+        if (tile2.element) {
+          tile2.element.classList.remove("selected");
+          tile2.element.classList.add("matched");
+        }
+
+        setTimeout(function () {
+          if (sessionAtStart !== gameSessionId) {
+            return;
+          }
+
+          tile1.removed = true;
+          tile2.removed = true;
+
+          if (tile1.element && tile1.element.parentNode) {
+            tile1.element.parentNode.removeChild(tile1.element);
+          }
+          if (tile2.element && tile2.element.parentNode) {
+            tile2.element.parentNode.removeChild(tile2.element);
+          }
+
+          tile1.element = null;
+          tile2.element = null;
+
+          score += 100;
+          pairs += 1;
+
+          updateStats();
+          updateBlockedStatus();
+
+          if (pairs >= totalPairs) {
+            gameWin();
+            return;
+          }
+
+          if (!hasAvailableMoves()) {
             showNoMovesModal();
-        }
+          }
+        }, 280);
+      }
 
-        function shuffleTiles() {
-            var freeTiles = tiles.filter(function(t) {
-                return !t.removed && isTileFree(t);
-            });
-            var symbols = freeTiles.map(function(t) {
-                return { symbol: t.symbol, type: t.type };
-            });
-            
-            for (var i = symbols.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var temp = symbols[i];
-                symbols[i] = symbols[j];
-                symbols[j] = temp;
+      function hasAvailableMoves() {
+        var freeTiles = tiles.filter(function (t) {
+          return !t.removed && isTileFree(t);
+        });
+
+        var i;
+        var j;
+
+        for (i = 0; i < freeTiles.length; i++) {
+          for (j = i + 1; j < freeTiles.length; j++) {
+            if (freeTiles[i].symbol === freeTiles[j].symbol) {
+              return true;
             }
-            
-            freeTiles.forEach(function(tile, index) {
-                tile.symbol = symbols[index].symbol;
-                tile.type = symbols[index].type;
-                if (tile.element) {
-                    tile.element.querySelector('.tile-symbol').textContent = tile.symbol;
-                    tile.element.setAttribute('data-type', tile.type);
-                }
-            });
-            
-            selectedTile = null;
-            updateBlockedStatus();
-            document.getElementById('noMovesModal').classList.remove('show');
+          }
         }
 
-        function resetGame() {
-            clearInterval(timerInterval);
-            document.getElementById('winModal').classList.remove('show');
-            document.getElementById('noMovesModal').classList.remove('show');
-            tg.MainButton.hide();
-            
-            score = 0;
-            pairs = 0;
-            selectedTile = null;
-            
-            tiles = [];
+        return false;
+      }
+
+      function updateStats() {
+        scoreEl.textContent = String(score);
+        pairsEl.textContent = pairs + "/" + totalPairs;
+      }
+
+      function startTimer() {
+        gameStartTime = Date.now();
+
+        if (timerInterval) {
+          clearInterval(timerInterval);
+        }
+
+        timerEl.textContent = "00:00";
+
+        timerInterval = setInterval(function () {
+          var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+          var minutes = String(Math.floor(elapsed / 60)).padStart(2, "0");
+          var seconds = String(elapsed % 60).padStart(2, "0");
+          timerEl.textContent = minutes + ":" + seconds;
+        }, 1000);
+      }
+
+      function gameWin() {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+
+        finalScoreEl.textContent = String(score);
+        finalTimeEl.textContent = timerEl.textContent;
+        winModal.classList.add("show");
+
+        if (hasTelegram) {
+          tg.MainButton.show();
+        }
+
+        notify("success");
+      }
+
+      function showNoMovesModal() {
+        noMovesModal.classList.add("show");
+      }
+
+      function hideModals() {
+        winModal.classList.remove("show");
+        noMovesModal.classList.remove("show");
+      }
+
+      function showHint() {
+        var freeTiles = tiles.filter(function (t) {
+          return !t.removed && isTileFree(t);
+        });
+
+        var i;
+        var j;
+
+        for (i = 0; i < freeTiles.length; i++) {
+          for (j = i + 1; j < freeTiles.length; j++) {
+            if (freeTiles[i].symbol === freeTiles[j].symbol) {
+              var tileA = freeTiles[i];
+              var tileB = freeTiles[j];
+
+              if (tileA.element) {
+                tileA.element.classList.add("hint");
+              }
+              if (tileB.element) {
+                tileB.element.classList.add("hint");
+              }
+
+              impact("light");
+
+              setTimeout(function () {
+                if (tileA.element) {
+                  tileA.element.classList.remove("hint");
+                }
+                if (tileB.element) {
+                  tileB.element.classList.remove("hint");
+                }
+              }, 1800);
+
+              return;
+            }
+          }
+        }
+
+        showNoMovesModal();
+      }
+
+      function applySymbolsToTiles(tileList) {
+        tileList.forEach(function (tile) {
+          if (!tile.element) {
+            return;
+          }
+
+          tile.element.setAttribute("data-type", tile.type);
+          tile.element.innerHTML = getTileHTML(tile.symbol, tile.type);
+        });
+      }
+
+      function shuffleTiles() {
+        var activeTiles = tiles.filter(function (t) {
+          return !t.removed;
+        });
+
+        if (activeTiles.length < 2) {
+          hideModals();
+          return;
+        }
+
+        clearSelection();
+
+        var attempts = 0;
+        var success = false;
+
+        while (attempts < 20 && !success) {
+          var symbols = activeTiles.map(function (t) {
+            return { symbol: t.symbol, type: t.type };
+          });
+
+          shuffleArray(symbols);
+
+          activeTiles.forEach(function (tile, index) {
+            tile.symbol = symbols[index].symbol;
+            tile.type = symbols[index].type;
+          });
+
+          updateBlockedStatus();
+
+          if (hasAvailableMoves()) {
+            success = true;
+          }
+
+          attempts++;
+        }
+
+        applySymbolsToTiles(activeTiles);
+        updateBlockedStatus();
+        hideModals();
+      }
+
+      function ensurePlayableBoard() {
+        var attempts = 0;
+
+        while (attempts < 20 && !hasAvailableMoves()) {
+          shuffleTiles();
+          attempts++;
+        }
+      }
+
+      function resetGame() {
+        gameSessionId += 1;
+
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+
+        hideModals();
+
+        if (hasTelegram) {
+          tg.MainButton.hide();
+        }
+
+        score = 0;
+        pairs = 0;
+        selectedTile = null;
+        tiles = [];
+
+        syncDimensions();
+        createTiles();
+        renderTiles();
+        ensurePlayableBoard();
+        updateStats();
+        startTimer();
+      }
+
+      function bindEvents() {
+        document.getElementById("shuffleBtn").addEventListener("click", shuffleTiles);
+        document.getElementById("resetBtn").addEventListener("click", resetGame);
+        document.getElementById("hintBtn").addEventListener("click", showHint);
+        document.getElementById("playAgainBtn").addEventListener("click", resetGame);
+        document.getElementById("modalShuffleBtn").addEventListener("click", shuffleTiles);
+
+        window.addEventListener("resize", function () {
+          var previousWidth = tileWidth;
+          syncDimensions();
+
+          if (previousWidth !== tileWidth && tiles.length > 0) {
             createTiles();
             renderTiles();
             updateStats();
-            startTimer();
-        }
+            ensurePlayableBoard();
+          }
+        });
 
-        tg.MainButton.onClick(function() {
+        if (hasTelegram) {
+          tg.MainButton.onClick(function () {
             resetGame();
-        });
+          });
+        }
+      }
 
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                resetGame();
-            }, 100);
-        });
-    </script>
+      bindEvents();
+      resetGame();
+    })();
+  </script>
 </body>
 </html>
