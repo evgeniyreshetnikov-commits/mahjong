@@ -505,9 +505,9 @@
       var difficultyBadgeEl = document.getElementById("difficultyBadge");
 
       var BASE_TILE_W = 54;
-      var BASE_TILE_H = 72;
+      var BASE_TILE_H = 70;
       var BASE_STEP_X = 56;
-      var BASE_STEP_Y = 74;
+      var BASE_STEP_Y = 68;
       var BASE_PADDING = 12;
 
       var tileWidth = BASE_TILE_W;
@@ -712,7 +712,7 @@
           if (rowApprox > maxRow) maxRow = rowApprox;
         }
 
-        var extraWidth = 6;
+        var extraWidth = 4;
         var startCol = Math.round((minCol + maxCol - extraWidth + 1) / 2);
         var startRow = maxRow + 1;
 
@@ -720,6 +720,39 @@
         addRect(positions, startCol, startRow + 1, extraWidth, 1, 0);
 
         return positions;
+      }
+
+      function normalizeLayoutPositions(positions) {
+        if (!positions || !positions.length) return positions;
+
+        var minX = Infinity;
+        var minY = Infinity;
+        var maxX = -Infinity;
+        var maxY = -Infinity;
+        var i;
+
+        for (i = 0; i < positions.length; i++) {
+          if (positions[i].x < minX) minX = positions[i].x;
+          if (positions[i].y < minY) minY = positions[i].y;
+          if (positions[i].x > maxX) maxX = positions[i].x;
+          if (positions[i].y > maxY) maxY = positions[i].y;
+        }
+
+        var innerMarginX = padding;
+        var innerMarginY = padding;
+
+        var normalized = positions.map(function (p) {
+          return {
+            x: (p.x - minX) + innerMarginX,
+            y: (p.y - minY) + innerMarginY,
+            z: p.z
+          };
+        });
+
+        normalized._contentWidth = (maxX - minX) + tileWidth + innerMarginX * 2;
+        normalized._contentHeight = (maxY - minY) + tileHeight + innerMarginY * 2;
+
+        return normalized;
       }
 
       function buildPyramidLayout() {
@@ -818,6 +851,7 @@
           positions.pop();
         }
 
+        positions = normalizeLayoutPositions(positions);
         return positions;
       }
 
@@ -838,26 +872,26 @@
 
       function calculateLayoutBounds() {
         var positions = getLayoutPositions();
+
+        if (positions._contentWidth && positions._contentHeight) {
+          layoutWidth = Math.ceil(positions._contentWidth);
+          layoutHeight = Math.ceil(positions._contentHeight);
+          return;
+        }
+
         var maxRight = 0;
         var maxBottom = 0;
-        var minLeft = Infinity;
-        var minTop = Infinity;
         var i;
         var p;
 
         for (i = 0; i < positions.length; i++) {
           p = positions[i];
-          if (p.x < minLeft) minLeft = p.x;
-          if (p.y < minTop) minTop = p.y;
           if (p.x + tileWidth > maxRight) maxRight = p.x + tileWidth;
           if (p.y + tileHeight > maxBottom) maxBottom = p.y + tileHeight;
         }
 
-        if (!isFinite(minLeft)) minLeft = 0;
-        if (!isFinite(minTop)) minTop = 0;
-
-        layoutWidth = Math.ceil(maxRight - minLeft + padding);
-        layoutHeight = Math.ceil(maxBottom - minTop + padding);
+        layoutWidth = Math.ceil(maxRight + padding);
+        layoutHeight = Math.ceil(maxBottom + padding);
       }
 
       function updateBoardMetrics() {
@@ -952,7 +986,7 @@
         var overlapToleranceX = Math.max(8, Math.floor(tileWidth * 0.28));
         var overlapToleranceY = Math.max(8, Math.floor(tileHeight * 0.28));
         var sideTolerance = 3;
-        var rowTolerance = Math.max(18, Math.floor(tileStepY * 0.28));
+        var rowTolerance = Math.max(16, Math.floor(tileStepY * 0.28));
 
         var hasTileAbove = stateTiles.some(function (t) {
           if (t.removed || t.z <= tile.z) return false;
