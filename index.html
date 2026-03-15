@@ -81,6 +81,19 @@
       letter-spacing: 0.4px;
     }
 
+    .layout-badge {
+      margin-top: 6px;
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 215, 0, 0.7);
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff7c2;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
     .stats {
       width: 100%;
       display: flex;
@@ -345,6 +358,7 @@
   <div class="app">
     <div class="game-header">
       <h1 class="title">🀄 Маджонг</h1>
+      <div class="layout-badge" id="layoutBadge">Раскладка: Пирамида</div>
     </div>
 
     <div class="stats">
@@ -430,6 +444,7 @@
       var noMovesModal = document.getElementById("noMovesModal");
       var finalScoreEl = document.getElementById("finalScore");
       var finalTimeEl = document.getElementById("finalTime");
+      var layoutBadgeEl = document.getElementById("layoutBadge");
 
       var BASE_TILE_W = 54;
       var BASE_TILE_H = 72;
@@ -455,6 +470,9 @@
       var gameStartTime = 0;
       var timerInterval = null;
       var gameSessionId = 0;
+
+      var currentLayoutKey = null;
+      var previousLayoutKey = null;
 
       var tileSymbols = [
         { key: "wind-east", type: "wind", src: "assets/tiles/wind-east.svg" },
@@ -493,6 +511,15 @@
         { key: "circle-9", type: "circle", src: "assets/tiles/circle-9.svg" }
       ];
 
+      var layouts = {
+        pyramid: { name: "Пирамида", build: buildPyramidLayout },
+        turtle: { name: "Черепаха", build: buildTurtleLayout },
+        garden: { name: "Сад", build: buildGardenLayout },
+        arch: { name: "Арка", build: buildArchLayout },
+        fortress: { name: "Крепость", build: buildFortressLayout },
+        crown: { name: "Корона", build: buildCrownLayout }
+      };
+
       function impact(type) {
         if (hasTelegram && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
           tg.HapticFeedback.impactOccurred(type);
@@ -522,86 +549,172 @@
         }
       }
 
-      function getTilePositions() {
-        var positions = [];
+      function addRect(positions, startCol, startRow, cols, rows, z, shiftX, shiftY) {
         var row;
         var col;
+        var offsetX = typeof shiftX === "number" ? shiftX : 0;
+        var offsetY = typeof shiftY === "number" ? shiftY : 0;
 
-        for (row = 0; row < 6; row++) {
-          for (col = 0; col < 7; col++) {
+        for (row = 0; row < rows; row++) {
+          for (col = 0; col < cols; col++) {
             positions.push({
-              x: padding + col * tileStepX,
-              y: padding + row * tileStepY,
-              z: 0
+              x: padding + (startCol + col) * tileStepX + offsetX,
+              y: padding + (startRow + row) * tileStepY + offsetY,
+              z: z
             });
           }
         }
+      }
 
-        for (row = 0; row < 5; row++) {
-          for (col = 0; col < 6; col++) {
-            positions.push({
-              x: padding + tileStepX + col * tileStepX,
-              y: padding + tileStepY / 2 + row * tileStepY,
-              z: 1
-            });
-          }
+      function addCells(positions, cells, z, shiftX, shiftY) {
+        var i;
+        var offsetX = typeof shiftX === "number" ? shiftX : 0;
+        var offsetY = typeof shiftY === "number" ? shiftY : 0;
+
+        for (i = 0; i < cells.length; i++) {
+          positions.push({
+            x: padding + cells[i].c * tileStepX + offsetX,
+            y: padding + cells[i].r * tileStepY + offsetY,
+            z: z
+          });
         }
+      }
 
-        for (row = 0; row < 4; row++) {
-          for (col = 0; col < 5; col++) {
-            positions.push({
-              x: padding + 2 * tileStepX + col * tileStepX,
-              y: padding + tileStepY + row * tileStepY,
-              z: 2
-            });
-          }
-        }
-
-        for (row = 0; row < 3; row++) {
-          for (col = 0; col < 4; col++) {
-            positions.push({
-              x: padding + 2.5 * tileStepX + col * tileStepX,
-              y: padding + 1.5 * tileStepY + row * tileStepY,
-              z: 3
-            });
-          }
-        }
-
-        for (row = 0; row < 2; row++) {
-          for (col = 0; col < 3; col++) {
-            positions.push({
-              x: padding + 3 * tileStepX + col * tileStepX,
-              y: padding + 2 * tileStepY + row * tileStepY,
-              z: 4
-            });
-          }
-        }
-
-        positions.push({ x: padding + 3.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
-        positions.push({ x: padding + 4.5 * tileStepX, y: padding + 2.5 * tileStepY, z: 5 });
-
+      function buildPyramidLayout() {
+        var positions = [];
+        addRect(positions, 0, 0, 7, 6, 0);
+        addRect(positions, 1, 0, 6, 5, 1, tileStepX * 0.5, tileStepY * 0.5);
+        addRect(positions, 2, 1, 5, 4, 2);
+        addRect(positions, 2, 1, 4, 3, 3, tileStepX * 0.5, tileStepY * 0.5);
+        addRect(positions, 3, 2, 3, 2, 4);
+        addCells(positions, [{ c: 3, r: 2 }, { c: 4, r: 2 }], 5, tileStepX * 0.5, tileStepY * 0.5);
         return positions;
       }
 
+      function buildTurtleLayout() {
+        var positions = [];
+        addRect(positions, 0, 1, 8, 5, 0);
+        addCells(positions, [{ c: -1, r: 2 }, { c: -1, r: 3 }, { c: 8, r: 2 }, { c: 8, r: 3 }], 0);
+        addCells(positions, [{ c: 2, r: 0 }, { c: 3, r: 0 }, { c: 4, r: 0 }, { c: 5, r: 0 }], 0);
+        addCells(positions, [{ c: 2, r: 6 }, { c: 3, r: 6 }, { c: 4, r: 6 }, { c: 5, r: 6 }], 0);
+        addRect(positions, 1, 1, 6, 4, 1, tileStepX * 0.5, tileStepY * 0.5);
+        addRect(positions, 2, 2, 4, 2, 2);
+        addRect(positions, 2, 2, 3, 2, 3, tileStepX * 0.5, tileStepY * 0.5);
+        addCells(positions, [{ c: 3, r: 2 }, { c: 4, r: 2 }], 4);
+        return positions;
+      }
+
+      function buildGardenLayout() {
+        var positions = [];
+        addRect(positions, 0, 1, 9, 4, 0);
+        addCells(positions, [
+          { c: 1, r: 0 }, { c: 2, r: 0 }, { c: 3, r: 0 }, { c: 5, r: 0 }, { c: 6, r: 0 }, { c: 7, r: 0 },
+          { c: 1, r: 5 }, { c: 2, r: 5 }, { c: 3, r: 5 }, { c: 5, r: 5 }, { c: 6, r: 5 }, { c: 7, r: 5 }
+        ], 0);
+        addRect(positions, 1, 1, 7, 3, 1, tileStepX * 0.5, tileStepY * 0.5);
+        addRect(positions, 3, 2, 3, 2, 2);
+        addRect(positions, 3, 2, 2, 1, 3, tileStepX * 0.5, tileStepY * 0.5);
+        addCells(positions, [{ c: 4, r: 2 }, { c: 5, r: 2 }], 4);
+        return positions;
+      }
+
+      function buildArchLayout() {
+        var positions = [];
+        addRect(positions, 0, 1, 3, 5, 0);
+        addRect(positions, 6, 1, 3, 5, 0);
+        addRect(positions, 2, 0, 5, 2, 0);
+        addRect(positions, 2, 4, 5, 2, 0);
+        addRect(positions, 1, 1, 7, 4, 1, tileStepX * 0.5, tileStepY * 0.5);
+        addRect(positions, 3, 2, 3, 2, 2);
+        addRect(positions, 3, 2, 2, 1, 3, tileStepX * 0.5, tileStepY * 0.5);
+        addCells(positions, [{ c: 4, r: 2 }, { c: 5, r: 2 }], 4);
+        return positions;
+      }
+
+      function buildFortressLayout() {
+        var positions = [];
+        addRect(positions, 0, 0, 9, 5, 0);
+        addCells(positions, [
+          { c: 2, r: 5 }, { c: 3, r: 5 }, { c: 4, r: 5 }, { c: 5, r: 5 }, { c: 6, r: 5 }
+        ], 0);
+        addRect(positions, 1, 1, 7, 3, 1, tileStepX * 0.5, tileStepY * 0.5);
+        addRect(positions, 2, 1, 5, 3, 2);
+        addRect(positions, 3, 2, 3, 1, 3, tileStepX * 0.5, tileStepY * 0.5);
+        addCells(positions, [{ c: 4, r: 2 }, { c: 5, r: 2 }], 4);
+        return positions;
+      }
+
+      function buildCrownLayout() {
+        var positions = [];
+        addCells(positions, [
+          { c: 0, r: 2 }, { c: 1, r: 2 }, { c: 2, r: 1 }, { c: 3, r: 0 }, { c: 4, r: 1 }, { c: 5, r: 2 },
+          { c: 6, r: 2 }, { c: 7, r: 1 }, { c: 8, r: 0 }, { c: 9, r: 1 }, { c: 10, r: 2 },
+          { c: 1, r: 3 }, { c: 2, r: 3 }, { c: 3, r: 3 }, { c: 4, r: 3 }, { c: 5, r: 3 },
+          { c: 6, r: 3 }, { c: 7, r: 3 }, { c: 8, r: 3 }, { c: 9, r: 3 },
+          { c: 2, r: 4 }, { c: 3, r: 4 }, { c: 4, r: 4 }, { c: 5, r: 4 }, { c: 6, r: 4 }, { c: 7, r: 4 }, { c: 8, r: 4 },
+          { c: 3, r: 5 }, { c: 4, r: 5 }, { c: 5, r: 5 }, { c: 6, r: 5 }, { c: 7, r: 5 },
+          { c: 4, r: 6 }, { c: 5, r: 6 }, { c: 6, r: 6 }
+        ], 0);
+        addCells(positions, [
+          { c: 2, r: 2 }, { c: 3, r: 2 }, { c: 4, r: 2 }, { c: 6, r: 2 }, { c: 7, r: 2 }, { c: 8, r: 2 },
+          { c: 3, r: 3 }, { c: 4, r: 3 }, { c: 5, r: 3 }, { c: 6, r: 3 }, { c: 7, r: 3 },
+          { c: 4, r: 4 }, { c: 5, r: 4 }, { c: 6, r: 4 }, { c: 7, r: 4 }
+        ], 1, tileStepX * 0.5, tileStepY * 0.5);
+        addCells(positions, [
+          { c: 4, r: 3 }, { c: 5, r: 3 }, { c: 6, r: 3 },
+          { c: 5, r: 4 }, { c: 6, r: 4 }
+        ], 2);
+        addCells(positions, [{ c: 5, r: 3 }, { c: 6, r: 3 }], 3, tileStepX * 0.5, tileStepY * 0.5);
+        return positions;
+      }
+
+      function getLayoutPositions() {
+        return layouts[currentLayoutKey].build();
+      }
+
+      function chooseRandomLayout() {
+        var keys = Object.keys(layouts);
+        var available = keys.slice();
+
+        if (previousLayoutKey && available.length > 1) {
+          available = available.filter(function (key) {
+            return key !== previousLayoutKey;
+          });
+        }
+
+        currentLayoutKey = available[Math.floor(Math.random() * available.length)];
+        previousLayoutKey = currentLayoutKey;
+        layoutBadgeEl.textContent = "Раскладка: " + layouts[currentLayoutKey].name;
+      }
+
       function calculateLayoutBounds() {
-        var positions = getTilePositions();
+        var positions = getLayoutPositions();
         var maxRight = 0;
         var maxBottom = 0;
+        var minLeft = Infinity;
+        var minTop = Infinity;
+        var i;
+        var p;
 
-        for (var i = 0; i < positions.length; i++) {
-          var p = positions[i];
+        for (i = 0; i < positions.length; i++) {
+          p = positions[i];
+          if (p.x < minLeft) minLeft = p.x;
+          if (p.y < minTop) minTop = p.y;
           if (p.x + tileWidth > maxRight) maxRight = p.x + tileWidth;
           if (p.y + tileHeight > maxBottom) maxBottom = p.y + tileHeight;
         }
 
-        layoutWidth = Math.ceil(maxRight + padding);
-        layoutHeight = Math.ceil(maxBottom + padding);
+        if (!isFinite(minLeft)) minLeft = 0;
+        if (!isFinite(minTop)) minTop = 0;
+
+        layoutWidth = Math.ceil(maxRight - minLeft + padding);
+        layoutHeight = Math.ceil(maxBottom - minTop + padding);
       }
 
       function updateBoardMetrics() {
         var appWidth = Math.min(window.innerWidth - 16, 460);
         var statsApprox = 74;
-        var headerApprox = 44;
+        var headerApprox = 58;
         var controlsApprox = 58;
         var hintsApprox = 22;
         var extraSpacing = 56;
@@ -631,11 +744,12 @@
       }
 
       function createTilesFromSymbols(symbolPool) {
-        var positions = getTilePositions();
+        var positions = getLayoutPositions();
         var numPairs = Math.floor(positions.length / 2);
         var selectedSymbols = [];
+        var i;
 
-        for (var i = 0; i < numPairs; i++) {
+        for (i = 0; i < numPairs; i++) {
           var tileData = symbolPool[i % symbolPool.length];
           selectedSymbols.push({
             key: tileData.key,
@@ -682,6 +796,42 @@
         });
       }
 
+      function isTileFreeInState(tile, stateTiles) {
+        if (!tile || tile.removed) return false;
+
+        var overlapToleranceX = Math.max(8, Math.floor(tileWidth * 0.28));
+        var overlapToleranceY = Math.max(8, Math.floor(tileHeight * 0.28));
+        var sideTolerance = 3;
+        var rowTolerance = Math.max(18, Math.floor(tileStepY * 0.28));
+
+        var hasTileAbove = stateTiles.some(function (t) {
+          if (t.removed || t.z <= tile.z) return false;
+
+          var overlapX = Math.abs(t.x - tile.x) < (tileWidth - overlapToleranceX);
+          var overlapY = Math.abs(t.y - tile.y) < (tileHeight - overlapToleranceY);
+
+          return overlapX && overlapY;
+        });
+
+        if (hasTileAbove) return false;
+
+        var leftBlocked = stateTiles.some(function (t) {
+          if (t.removed || t.z !== tile.z || t.id === tile.id) return false;
+          var sameRow = Math.abs(t.y - tile.y) < rowTolerance;
+          var onLeft = Math.abs(t.x - (tile.x - tileStepX)) <= sideTolerance;
+          return sameRow && onLeft;
+        });
+
+        var rightBlocked = stateTiles.some(function (t) {
+          if (t.removed || t.z !== tile.z || t.id === tile.id) return false;
+          var sameRow = Math.abs(t.y - tile.y) < rowTolerance;
+          var onRight = Math.abs(t.x - (tile.x + tileStepX)) <= sideTolerance;
+          return sameRow && onRight;
+        });
+
+        return !leftBlocked || !rightBlocked;
+      }
+
       function getFreeTilesFromState(stateTiles) {
         return stateTiles.filter(function (tile) {
           return !tile.removed && isTileFreeInState(tile, stateTiles);
@@ -716,9 +866,7 @@
 
         for (i = 0; i < freeTiles.length; i++) {
           key = freeTiles[i].key;
-          if (!grouped[key]) {
-            grouped[key] = [];
-          }
+          if (!grouped[key]) grouped[key] = [];
           grouped[key].push(freeTiles[i]);
         }
 
@@ -734,6 +882,18 @@
         return moves;
       }
 
+      function tileExposureScore(tile, stateTiles) {
+        var freeTiles = getFreeTilesFromState(stateTiles);
+        var countsByZ = {};
+        var i;
+
+        for (i = 0; i < freeTiles.length; i++) {
+          countsByZ[freeTiles[i].z] = (countsByZ[freeTiles[i].z] || 0) + 1;
+        }
+
+        return (10 - tile.z) * 2 + (countsByZ[tile.z] || 0);
+      }
+
       function simulateQualityScore(stateTiles, maxSteps) {
         var cloned = cloneTilesData(stateTiles);
         var steps = 0;
@@ -742,9 +902,7 @@
 
         while (steps < maxSteps) {
           var moves = getAllAvailableMovesInState(cloned);
-          if (!moves.length) {
-            break;
-          }
+          if (!moves.length) break;
 
           moves.sort(function (a, b) {
             var scoreA = tileExposureScore(a[0], cloned) + tileExposureScore(a[1], cloned);
@@ -762,35 +920,20 @@
         return immediatePairs * 30 + steps * 18 + moveHistoryBonus * 4;
       }
 
-      function tileExposureScore(tile, stateTiles) {
-        var freeTiles = getFreeTilesFromState(stateTiles);
-        var countsByZ = {};
-        var i;
-
-        for (i = 0; i < freeTiles.length; i++) {
-          countsByZ[freeTiles[i].z] = (countsByZ[freeTiles[i].z] || 0) + 1;
-        }
-
-        return (10 - tile.z) * 2 + (countsByZ[tile.z] || 0);
-      }
-
       function chooseBestInitialLayout() {
         var bestTiles = null;
         var bestScore = -1;
-        var attempts = 36;
+        var attempts = 30;
+        var i;
 
-        for (var i = 0; i < attempts; i++) {
+        for (i = 0; i < attempts; i++) {
           var candidate = createTilesFromSymbols(tileSymbols);
           var pairsCount = countAvailablePairsInState(candidate);
           var quality = simulateQualityScore(candidate, 18);
           var scoreValue = pairsCount * 50 + quality;
 
-          if (pairsCount >= 4) {
-            scoreValue += 120;
-          }
-          if (pairsCount >= 5) {
-            scoreValue += 80;
-          }
+          if (pairsCount >= 4) scoreValue += 120;
+          if (pairsCount >= 5) scoreValue += 80;
 
           if (scoreValue > bestScore) {
             bestScore = scoreValue;
@@ -830,42 +973,6 @@
         });
 
         updateBlockedStatus();
-      }
-
-      function isTileFreeInState(tile, stateTiles) {
-        if (!tile || tile.removed) return false;
-
-        var overlapToleranceX = Math.max(8, Math.floor(tileWidth * 0.28));
-        var overlapToleranceY = Math.max(8, Math.floor(tileHeight * 0.28));
-        var sideTolerance = 3;
-        var rowTolerance = Math.max(18, Math.floor(tileStepY * 0.28));
-
-        var hasTileAbove = stateTiles.some(function (t) {
-          if (t.removed || t.z <= tile.z) return false;
-
-          var overlapX = Math.abs(t.x - tile.x) < (tileWidth - overlapToleranceX);
-          var overlapY = Math.abs(t.y - tile.y) < (tileHeight - overlapToleranceY);
-
-          return overlapX && overlapY;
-        });
-
-        if (hasTileAbove) return false;
-
-        var leftBlocked = stateTiles.some(function (t) {
-          if (t.removed || t.z !== tile.z || t.id === tile.id) return false;
-          var sameRow = Math.abs(t.y - tile.y) < rowTolerance;
-          var onLeft = Math.abs(t.x - (tile.x - tileStepX)) <= sideTolerance;
-          return sameRow && onLeft;
-        });
-
-        var rightBlocked = stateTiles.some(function (t) {
-          if (t.removed || t.z !== tile.z || t.id === tile.id) return false;
-          var sameRow = Math.abs(t.y - tile.y) < rowTolerance;
-          var onRight = Math.abs(t.x - (tile.x + tileStepX)) <= sideTolerance;
-          return sameRow && onRight;
-        });
-
-        return !leftBlocked || !rightBlocked;
       }
 
       function isTileFree(tile) {
@@ -919,9 +1026,7 @@
           matchTiles(selectedTile, tile);
           selectedTile = null;
         } else {
-          if (selectedTile.element) {
-            selectedTile.element.classList.remove("selected");
-          }
+          if (selectedTile.element) selectedTile.element.classList.remove("selected");
           selectedTile = tile;
         }
       }
@@ -992,9 +1097,7 @@
       function startTimer() {
         gameStartTime = Date.now();
 
-        if (timerInterval) {
-          clearInterval(timerInterval);
-        }
+        if (timerInterval) clearInterval(timerInterval);
 
         timerEl.textContent = "00:00";
 
@@ -1016,9 +1119,7 @@
         finalTimeEl.textContent = timerEl.textContent;
         winModal.classList.add("show");
 
-        if (hasTelegram) {
-          tg.MainButton.show();
-        }
+        if (hasTelegram) tg.MainButton.show();
 
         notify("success");
       }
@@ -1071,9 +1172,7 @@
 
       function trySmartShuffle(minPairsTarget, attemptsLimit) {
         var activeTiles = getRemainingTiles();
-        if (activeTiles.length < 2) {
-          return false;
-        }
+        if (activeTiles.length < 2) return false;
 
         var originalActive = activeTiles.map(function (tile) {
           return {
@@ -1087,8 +1186,9 @@
         var bestArrangement = null;
         var bestScore = -1;
         var attempts = attemptsLimit || 40;
+        var attempt;
 
-        for (var attempt = 0; attempt < attempts; attempt++) {
+        for (attempt = 0; attempt < attempts; attempt++) {
           var pool = originalActive.slice();
           shuffleArray(pool);
 
@@ -1102,23 +1202,17 @@
           var quality = simulateQualityScore(tiles, 14);
           var scoreValue = pairCount * 50 + quality;
 
-          if (pairCount >= minPairsTarget) {
-            scoreValue += 200;
-          }
+          if (pairCount >= minPairsTarget) scoreValue += 200;
 
           if (scoreValue > bestScore) {
             bestScore = scoreValue;
             bestArrangement = pool.slice();
           }
 
-          if (pairCount >= minPairsTarget) {
-            break;
-          }
+          if (pairCount >= minPairsTarget) break;
         }
 
-        if (!bestArrangement) {
-          return false;
-        }
+        if (!bestArrangement) return false;
 
         activeTiles.forEach(function (tile, index) {
           tile.key = bestArrangement[index].key;
@@ -1131,15 +1225,10 @@
 
       function maybeAssistBoard() {
         var remaining = getRemainingTiles().length;
-        if (remaining < 8) {
-          return;
-        }
+        if (remaining < 8) return;
 
         var availablePairs = countAvailablePairs();
-
-        if (availablePairs >= 3) {
-          return;
-        }
+        if (availablePairs >= 3) return;
 
         clearSelection();
         trySmartShuffle(3, 30);
@@ -1175,9 +1264,7 @@
           var pairsCount = countAvailablePairs();
           var quality = simulateQualityScore(tiles, 16);
 
-          if (pairsCount >= 4 && quality >= 220) {
-            return;
-          }
+          if (pairsCount >= 4 && quality >= 220) return;
 
           trySmartShuffle(4, 30);
           attempts += 1;
@@ -1200,15 +1287,14 @@
 
         hideModals();
 
-        if (hasTelegram) {
-          tg.MainButton.hide();
-        }
+        if (hasTelegram) tg.MainButton.hide();
 
         score = 0;
         pairs = 0;
         selectedTile = null;
         tiles = [];
 
+        chooseRandomLayout();
         calculateLayoutBounds();
         updateBoardMetrics();
         chooseBestInitialLayout();
@@ -1226,9 +1312,9 @@
       document.getElementById("modalShuffleBtn").addEventListener("click", shuffleTiles);
 
       window.addEventListener("resize", function () {
-        if (tiles.length > 0) {
+        if (tiles.length > 0 && currentLayoutKey) {
           rebuildBoardOnly();
-        } else {
+        } else if (currentLayoutKey) {
           updateBoardMetrics();
         }
       });
@@ -1239,6 +1325,7 @@
         });
       }
 
+      currentLayoutKey = "pyramid";
       updateBoardMetrics();
       resetGame();
     })();
