@@ -2,9 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🀄 Маджонг</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -14,14 +12,13 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
-            -webkit-user-select: none;
         }
         
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: Arial, sans-serif;
         }
         
         body {
@@ -29,102 +26,121 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 8px;
+            padding: 5px;
         }
         
         .game-header {
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             width: 100%;
+            flex-shrink: 0;
         }
         
         .title {
-            font-size: 28px;
+            font-size: 24px;
             color: #ffd700;
             font-weight: 900;
-            text-shadow: 3px 3px 6px #000;
+            text-shadow: 2px 2px 4px #000;
         }
         
         .stats {
             display: flex;
-            gap: 8px;
+            gap: 5px;
             justify-content: center;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             width: 100%;
+            flex-shrink: 0;
         }
         
         .stat-box {
-            background: rgba(255, 255, 255, 0.25);
-            padding: 10px 16px;
-            border-radius: 10px;
-            border: 3px solid #ffd700;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 2px solid #ffd700;
             text-align: center;
-            min-width: 75px;
+            min-width: 65px;
         }
         
         .stat-label {
             color: #fff;
-            font-size: 11px;
+            font-size: 9px;
             text-transform: uppercase;
-            font-weight: 700;
         }
         
         .stat-value {
             color: #ffd700;
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 900;
         }
         
+        /* ПОЛЕ - МЕНЬШЕ ВЫСОТА */
         .game-board {
             position: relative;
             background: #2d5a3f;
-            border-radius: 12px;
-            padding: 12px;
-            border: 4px solid #8b4513;
+            border-radius: 10px;
+            padding: 10px;
+            border: 3px solid #8b4513;
             width: 100%;
-            max-width: 420px;
-            height: 580px;
+            max-width: 380px;
+            height: 480px;
             flex-shrink: 0;
             overflow: visible;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
         
-        /* ПЛИТКА С SVG */
+        /* ПЛИТКА */
         .tile {
             position: absolute;
-            width: 54px;
-            height: 72px;
+            width: 48px;
+            height: 64px;
             background: linear-gradient(145deg, #fffef8 0%, #f5ebd8 100%);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             box-shadow: 
-                0 3px 6px rgba(0,0,0,0.4),
-                0 6px 12px rgba(0,0,0,0.3),
-                inset 0 2px 4px rgba(255,255,255,0.9);
-            border: 3px solid #d4c4a8;
+                2px 2px 4px rgba(0,0,0,0.4),
+                3px 3px 6px rgba(0,0,0,0.3);
+            border: 2px solid #d4c4a8;
             z-index: 1;
         }
         
-        /* SVG НА ВСЮ ПЛИТКУ */
-        .tile svg {
-            width: 90%;
-            height: 90%;
-            display: block;
+        /* СИМВОЛ - КРУПНЫЙ И ЦВЕТНОЙ */
+        .tile-symbol {
+            font-size: 44px;
+            line-height: 1;
+            font-weight: 900;
+            /* Цвета по типам */
+        }
+        
+        .tile[data-type="bamboo"] .tile-symbol,
+        .tile[data-type="character"] .tile-symbol {
+            color: #006400;
+            text-shadow: 0 0 3px #000, 0 0 6px #000;
+        }
+        
+        .tile[data-type="circle"] .tile-symbol,
+        .tile[data-type="dragon"] .tile-symbol {
+            color: #cc0000;
+            text-shadow: 0 0 3px #000, 0 0 6px #000;
+        }
+        
+        .tile[data-type="wind"] .tile-symbol,
+        .tile[data-type="flower"] .tile-symbol {
+            color: #000080;
+            text-shadow: 0 0 3px #000, 0 0 6px #000;
         }
         
         .tile.selected {
-            background: linear-gradient(145deg, #ffd700 0%, #ffaa00 100%);
-            box-shadow: 0 0 30px #ffd700, 0 0 60px #ffaa00, 0 6px 12px rgba(0,0,0,0.3);
+            background: #ffd700;
+            box-shadow: 0 0 25px #ffd700, 0 0 50px #ffaa00;
             z-index: 100;
-            border: 4px solid #ff6600;
+            border: 3px solid #ff6600;
             transform: scale(1.1);
         }
         
         .tile.blocked {
-            filter: brightness(0.25);
+            filter: brightness(0.3);
             cursor: not-allowed;
         }
         
@@ -135,42 +151,43 @@
         .tile.matched {
             opacity: 0;
             transform: scale(0.6);
-            transition: all 0.25s ease-out;
+            transition: all 0.25s;
         }
         
         .tile.hint {
-            box-shadow: 0 0 35px #00ff00, 0 0 70px #00ff00 !important;
+            box-shadow: 0 0 30px #00ff00, 0 0 60px #00ff00 !important;
             z-index: 101;
-            animation: hintPulse 0.5s ease-in-out infinite;
-            border: 4px solid #00ff00;
+            animation: pulse 0.5s infinite;
         }
         
-        @keyframes hintPulse {
+        @keyframes pulse {
             0%, 100% { transform: scale(1.1); }
             50% { transform: scale(1.15); }
         }
         
+        /* КНОПКИ - ВИДНЫ ВСЕГДА */
         .controls {
-            margin-top: 12px;
+            margin-top: 8px;
             display: flex;
-            gap: 8px;
+            gap: 5px;
             flex-wrap: wrap;
             justify-content: center;
             width: 100%;
-            max-width: 420px;
+            max-width: 380px;
             z-index: 1000;
+            flex-shrink: 0;
         }
         
         .btn {
-            padding: 14px 18px;
-            font-size: 14px;
+            padding: 12px 14px;
+            font-size: 12px;
             font-weight: 900;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             text-transform: uppercase;
             flex: 1;
-            min-width: 100px;
+            min-width: 85px;
         }
         
         .btn-primary {
@@ -184,11 +201,12 @@
         }
         
         .hints {
-            margin-top: 8px;
+            margin-top: 5px;
             color: #fff;
-            font-size: 12px;
+            font-size: 10px;
             text-align: center;
-            opacity: 0.85;
+            opacity: 0.8;
+            flex-shrink: 0;
         }
         
         .modal {
@@ -197,7 +215,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.92);
+            background: rgba(0,0,0,0.9);
             display: none;
             align-items: center;
             justify-content: center;
@@ -210,56 +228,44 @@
         
         .modal-content {
             background: linear-gradient(145deg, #1a472a 0%, #2d5a3f 100%);
-            padding: 30px 25px;
+            padding: 25px 20px;
             border-radius: 15px;
             text-align: center;
-            border: 4px solid #ffd700;
+            border: 3px solid #ffd700;
             max-width: 85%;
         }
         
         .modal-title {
-            font-size: 30px;
+            font-size: 26px;
             color: #ffd700;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             font-weight: 900;
         }
         
         .modal-text {
-            font-size: 18px;
+            font-size: 16px;
             color: #fff;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
-        @media (max-width: 380px) {
+        /* АДАПТАЦИЯ */
+        @media (max-height: 700px) {
             .game-board {
-                max-width: 360px;
-                height: 540px;
+                height: 420px;
             }
             .tile {
-                width: 50px;
-                height: 68px;
+                width: 44px;
+                height: 58px;
             }
-        }
-        
-        @media (max-width: 350px) {
-            .game-board {
-                max-width: 330px;
-                height: 500px;
-            }
-            .tile {
-                width: 46px;
-                height: 64px;
+            .tile-symbol {
+                font-size: 40px;
             }
         }
         
-        @media (min-width: 430px) {
+        @media (max-width: 360px) {
             .game-board {
-                max-width: 460px;
-                height: 620px;
-            }
-            .tile {
-                width: 58px;
-                height: 76px;
+                max-width: 340px;
+                height: 440px;
             }
         }
     </style>
@@ -297,7 +303,6 @@
     <div class="modal" id="winModal">
         <div class="modal-content">
             <div class="modal-title">🎉 Победа!</div>
-            <div class="modal-text">Вы очистили все плитки!</div>
             <div class="modal-text">Счёт: <span id="finalScore">0</span></div>
             <div class="modal-text">Время: <span id="finalTime">00:00</span></div>
             <button class="btn btn-primary" onclick="resetGame()">Играть снова</button>
@@ -307,7 +312,6 @@
     <div class="modal" id="noMovesModal">
         <div class="modal-content">
             <div class="modal-title">⚠️ Нет ходов!</div>
-            <div class="modal-text">Доступных пар не осталось</div>
             <button class="btn btn-primary" onclick="shuffleTiles()">Перемешать</button>
         </div>
     </div>
@@ -327,28 +331,6 @@
             text_color: '#ffd700'
         });
         
-        // SVG для каждой плитки - ЧЁТКАЯ ГРАФИКА
-        function getTileSVG(symbol, type) {
-            var colors = {
-                bamboo: '#006400',
-                character: '#006400',
-                circle: '#cc0000',
-                dragon: '#cc0000',
-                wind: '#000080',
-                flower: '#000080'
-            };
-            
-            var color = colors[type] || '#000000';
-            
-            // SVG с крупным символом
-            return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
-                '<rect width="100" height="100" fill="#fffef8" rx="8"/>' +
-                '<text x="50" y="72" font-size="70" font-weight="900" text-anchor="middle" ' +
-                'fill="' + color + '" stroke="#000" stroke-width="3" ' +
-                'font-family="Arial, sans-serif">' + symbol + '</text>' +
-                '</svg>';
-        }
-
         var tileSymbols = [
             { symbol: '🀀', type: 'wind' }, { symbol: '🀁', type: 'wind' },
             { symbol: '🀂', type: 'wind' }, { symbol: '🀃', type: 'wind' },
@@ -379,11 +361,11 @@
         var timerInterval = null;
         var totalPairs = 0;
         
-        var tileWidth = 54;
-        var tileHeight = 72;
-        var tileStepX = 56;
-        var tileStepY = 74;
-        var padding = 12;
+        var tileWidth = 48;
+        var tileHeight = 64;
+        var tileStepX = 50;
+        var tileStepY = 66;
+        var padding = 10;
 
         function getTilePositions() {
             var positions = [];
@@ -496,8 +478,10 @@
                 element.style.top = tile.y + 'px';
                 element.style.zIndex = tile.z + 1;
                 
-                // SVG вместо emoji
-                element.innerHTML = getTileSVG(tile.symbol, tile.type);
+                var symbolEl = document.createElement('span');
+                symbolEl.className = 'tile-symbol';
+                symbolEl.textContent = tile.symbol;
+                element.appendChild(symbolEl);
                 
                 element.addEventListener('click', function() {
                     onTileClick(tile);
@@ -714,7 +698,7 @@
                 tile.symbol = symbols[index].symbol;
                 tile.type = symbols[index].type;
                 if (tile.element) {
-                    tile.element.innerHTML = getTileSVG(tile.symbol, tile.type);
+                    tile.element.querySelector('.tile-symbol').textContent = tile.symbol;
                     tile.element.setAttribute('data-type', tile.type);
                 }
             });
